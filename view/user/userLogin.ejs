@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 350px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 0.5rem;
+        }
+        input {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+        }
+        button {
+            padding: 0.75rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .links {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .links a {
+            color: #4CAF50;
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .error-message{
+            color: red;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="errorMessage" class="error-message" role="alert"></div>
+        <h1>Login</h1>
+        <% if(typeof errorMessage !=='undefined'){ %>
+            <div class="error-message"><%= errorMessage %></div>
+           <%} %>
+           <form id="loginForm" novalidate>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required autocomplete="email">
+            <span id="emailError" class="error-message"></span>
+        
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password">
+            <span id="passwordError" class="error-message"></span>
+        
+            <button type="submit">Log In</button>
+        
+            <!-- General error message -->
+ 
+        </form>
+        
+        <div class="links">
+            <a href="/auth/signup">Sign Up</a>
+            <a href="/auth/forgetpassword">Forgot Password?</a>
+            <a href="/auth/google">Google Sign In</a>
+        </div>
+    </div>
+
+    <script>
+
+
+
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Clear previous error messages
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const errorMessage = document.getElementById('errorMessage');
+    emailError.textContent = '';
+    passwordError.textContent = '';
+    errorMessage.textContent = '';
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    let isValid = true;
+
+    // Email validation
+    if (email === '') {
+        isValid = false;
+        emailError.textContent = 'Email is required';
+    }
+
+    // Password validation
+    if (password === '') {
+        isValid = false;
+        passwordError.textContent = 'Password is required';
+    } else if (password.length < 6) {
+        isValid = false;
+        passwordError.textContent = 'Password must be at least 6 characters';
+    }
+
+    const data = { email, password };
+
+    async function getDatas(data) {
+        try {
+            const url = 'http://localhost:3000/auth/login';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.href = 'http://localhost:3000/user/home';
+            } else {
+                errorMessage.textContent = result.message || 'An error occurred during login.';
+            }
+        } catch (error) {
+            console.error(error);
+            errorMessage.textContent = 'you are blocked';
+        }
+    }
+
+    // Submit form only if validation passes
+    if (isValid) {
+        getDatas(data);
+    }
+});
+
+
+    </script>
+</body>
+</html>

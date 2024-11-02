@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        .card-title {
+            color: #10b981;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .order-info {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+        .shipping-info {
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+        }
+        .shipping-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .shipping-info p {
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin: 0;
+        }
+        .total {
+            text-align: right;
+            margin-bottom: 1.5rem;
+        }
+        .total-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .total-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #111827;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        .button {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .button-outline {
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+        .button-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .button svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="card-title">Order Confirmed</h1>
+        <div class="order-info">
+            <h3 style="color: black;">
+                OrdeID:<%= orderId %> <br>
+            </h3>
+            <h3 style="color: black;">
+                Date:<%= date %>
+            </h3>
+           
+        </div>
+        <div class="shipping-info">
+            <h3>Shipping To</h3>
+            <p >
+                <%= address.name %><br>
+                <%= address.address %><br>
+                <%= address.country %><br>
+                <%= address.state %><br>
+                <%= address.pincode %><br>
+                <%= address.city %><br>
+                
+            </p>
+        </div>
+        <div class="total">
+            <div class="total-label">Total</div>
+            <div class="total-amount"><%= totalPrice %></div>
+        </div>
+        <div class="buttons">
+            <a href=" http://localhost:3000/user/home" class="button button-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Continue Shopping
+            </a>
+            <a href="/orders" class="button button-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                View Orders
+            </a>
+        </div>
+    </div>
+</body>
+</html>

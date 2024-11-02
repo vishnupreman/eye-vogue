@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 0.5rem;
+        }
+        input {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+        }
+        button {
+            padding: 0.75rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .login-link a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        .error-message{
+            color: red;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Up</h1>
+        <form id="signupForm" novalidate, method="post">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name"  autocomplete="name">
+            <span id="errorname"></span>
+
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email"  autocomplete="email">
+            <span id="erroremail"></span>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password"  autocomplete="new-password">
+            <span id="errorpassword"></span>
+            
+
+
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword"  autocomplete="new-password">
+            <span id="errorconfirmpassword"></span>
+
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone"  autocomplete="tel">
+            <span id="errorphone"></span>
+
+
+            <!-- <div id="errorMessage" class="error" role="alert"></div> -->
+            
+            <button type="submit">Sign Up</button>
+        </form>
+        <div class="login-link">
+            Already have an account? <a href="/auth/login">Log In</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit',function(event){
+            event.preventDefault(); 
+     
+            
+            clearErrors() // clearing the previous error
+
+            let isValid = true;
+
+            //get values 
+            const name = document.getElementById('name').value.trim()
+            const email = document.getElementById('email').value.trim()
+            const password = document.getElementById('password').value.trim()
+            const confirmPassword = document.getElementById('confirmPassword').value.trim()
+            const phone = document.getElementById('phone').value.trim()
+            // console.log(name,email,password,phone);
+
+
+            // name validation
+            if(name==''){
+                // console.log(name)
+                isValid = false;
+                document.getElementById('errorname').textContent='Name is required.'
+            }
+
+            //email validation
+            const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/  
+            if(email==''){
+                isValid = false
+                document.getElementById('erroremail').textContent='Email is required'
+            }else if(!emailPattern.test(email)){
+                isValid = false
+                document.getElementById('erroremail').textContent = 'Please enter a valid email address.'
+            }
+
+            // password validation
+            if(password==''){
+                isValid = false
+                document.getElementById('errorpassword').textContent='password is required'
+            }else if(password.length<6){
+                isValid = false
+                document.getElementById('errorpassword').textContent='Password must be minimum 6 characters'
+            }
+
+            //confirm pass validation
+            if(confirmPassword==''){
+                isValid = false
+                document.getElementById('errorconfirmpassword').textContent='Please confirm your password.'
+            }else if(password!==confirmPassword){
+                isValid = false
+                document.getElementById('errorconfirmpassword').textContent = 'Passwords do not match.'
+            }
+
+            //phone validation
+            if(phone==''){
+                isValid = false
+                document.getElementById('errorphone').textContent='number is required'
+            }
+
+            const data = {
+                name,email,password,confirmPassword,phone
+            }
+            async function getData(data) {
+                try {
+                    const url =`http://localhost:3000/auth/signup`
+                   
+                    console.log(data);
+                    
+                    const response = await fetch(url,{
+                        method:'POST',
+                        headers:{
+                            'Content-type':'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    const result = await response.json() //Parse the JSON response
+                    // console.log(result);
+                    if (response.ok) {
+                        // Redirect to the OTP page or handle successful registration
+                        alert('signup successfull');
+                            window.location.href = '/auth/signup/otp'
+                    } else {
+                        // Handle server errors or validation failures from the backend
+                        alert('Error: ' + result.message);
+                    }
+
+                } catch (error) {
+                    console.log(error);
+                    
+                }
+            }
+            if (isValid) {
+                getData(data)
+            }
+            
+        })
+
+
+        function clearErrors(){
+            document.getElementById('errorname').textContent=''
+            document.getElementById('erroremail').textContent=''
+            document.getElementById('errorpassword').textContent=''
+            document.getElementById('errorconfirmpassword').textContent=''
+            document.getElementById('errorphone').textContent=''
+        }
+    </script>
+</body>
+</html>

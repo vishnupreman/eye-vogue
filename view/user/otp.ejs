@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enter OTP</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: black;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: #1a1a1a;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 350px;
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 1.5rem;
+      }
+      p {
+        margin-bottom: 1.5rem;
+        color: #ccc;
+      }
+      .otp-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+      .otp-input {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        text-align: center;
+        border: 1px solid #333;
+        border-radius: 4px;
+        background-color: #333;
+        color: white;
+      }
+      .otp-input:focus {
+        outline: none;
+        border-color: #4caf50;
+      }
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+        margin-bottom: 1rem;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .error {
+        color: #ff6b6b;
+        margin-top: 1rem;
+      }
+      .resend {
+        margin-top: 1rem;
+        color: #4caf50;
+        text-decoration: none;
+      }
+      .resend:hover {
+        text-decoration: underline;
+      }
+      #generatedOtp {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Enter OTP</h1>
+      <p>Generate a 6-digit OTP or enter the one sent to your email.</p>
+      <!-- <button id="generateOtp">Generate OTP</button>
+      <div id="generatedOtp"></div> -->
+      <form id="otpForm" novalidate>
+        <div class="otp-container">
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="\d"
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="\d"
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="\d"
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="\d"
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="\d"
+            required
+          />
+          <input
+            type="text"
+            class="otp-input"
+            maxlength="1"
+            pattern="\d"
+            required
+          />
+        </div>
+        <button type="submit" id="verifyButton" disabled>Verify</button>
+        <button type="submit" id="generateOTP" disabled>Generate OTP</button>
+      </form>
+      <div id="errorMessage" class="error" role="alert"></div>
+      <a href="#" class="resend">Resend OTP</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const otpInputs = document.querySelectorAll(".otp-input");
+    const otpForm = document.getElementById("otpForm");
+    const verifyButton = document.getElementById("verifyButton");
+    const errorMessage = document.getElementById("errorMessage");
+    const generateOTP = document.getElementById('generateOTP');
+
+    // Enable generate OTP button on page load
+    generateOTP.disabled = false;
+
+    // Function to check if all OTP input fields are filled
+    const checkFields = () => {
+      let allFields = true;
+      otpInputs.forEach((input) => {
+        if (input.value === "") {
+          allFields = false;
+        }
+      });
+
+      verifyButton.disabled = !allFields; // Enable the button if all fields are filled
+    };
+
+    // Listen for input events on each OTP input field
+    otpInputs.forEach((input) => {
+      input.addEventListener("input", checkFields);
+    });
+
+    // OTP generate button
+    generateOTP.addEventListener('click', async function (e) {
+      e.preventDefault();
+      console.log('Generate OTP clicked');
+      
+      try {
+        // Disable the button to prevent multiple submissions
+        generateOTP.disabled = true;
+
+        // const token = localStorage.getItem('token');
+        const url = "http://localhost:3000/auth/signup/otp";
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert("OTP sent successfully");
+        } else {
+          console.log("OTP failed to send");
+          errorMessage.textContent = 'Unable to send OTP';
+        }
+      } catch (error) {
+        console.error("Error generating OTP:", error);
+        errorMessage.textContent = 'Error generating OTP';
+      } finally {
+        // Re-enable the button after processing is done
+        generateOTP.disabled = false;
+      }
+    });
+
+    // Handle OTP form submission
+    otpForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      // Collect the OTP values
+      const otpValues = Array.from(otpInputs)
+        .map((input) => input.value)
+        .join("");
+      console.log("Submitted OTP:", otpValues);
+
+      try {
+        // Disable the button to prevent multiple submissions
+        verifyButton.disabled = true;
+
+        // const token = localStorage.getItem('token'); // Include the token in the verification
+        const url = "http://localhost:3000/auth/signup/otp/verify";
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // "Authorization": `Bearer ${token}` // Add the token to the request headers
+          },
+          body: JSON.stringify({ otp: otpValues }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          console.log("OTP verification successful");
+          window.location.href = 'http://localhost:3000/auth/login';
+        } else {
+          console.log("OTP verification failed");
+          errorMessage.textContent = 'OTP verification failed';
+        }
+      } catch (error) {
+        console.error("Error verifying OTP:", error);
+        errorMessage.textContent = 'Error verifying OTP';
+      } finally {
+        // Re-enable the button after the request is completed
+        verifyButton.disabled = false;
+      }
+    });
+  });
+    </script>
+  </body>
+</html>
