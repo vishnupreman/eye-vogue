@@ -1,4 +1,5 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+
 const cartItemSchema = new mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
@@ -7,12 +8,7 @@ const cartItemSchema = new mongoose.Schema({
     },
     color: {
         type: String,
-        enum: ['yellow', 'black', 'red', 'green'], 
-        required: true
-    },
-    size: {
-        type: String,
-        enum: ['s', 'm', 'l'], 
+        enum: ['yellow', 'black', 'red', 'green'],
         required: true
     },
     quantity: {
@@ -24,7 +20,7 @@ const cartItemSchema = new mongoose.Schema({
     price: {
         type: Number,
         required: true
-    }
+    },
 });
 
 const cartSchema = new mongoose.Schema({
@@ -35,11 +31,19 @@ const cartSchema = new mongoose.Schema({
     },
     items: [cartItemSchema], 
     totalPrice: {
-        type: Number,
-        // required: true,
+        type: Number, 
         default: 0
-    },
+    }
 }, { timestamps: true });
 
-const cart = mongoose.model('Cart',cartSchema)
-module.exports = cart
+
+cartSchema.methods.calculateTotalPrice = function () {
+    let total = 0;
+    this.items.forEach(item => {
+        total += (item.discountedPrice || item.price) * item.quantity; 
+    });
+    this.totalPrice = total;
+};
+
+const Cart = mongoose.model('Cart', cartSchema);
+module.exports = Cart;

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .order-header {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .order-header h1 {
+            color: #088178;
+            margin: 0;
+        }
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .order-info-item {
+            flex-basis: 30%;
+            margin-bottom: 20px;
+        }
+        .order-info-item h2 {
+            color: #088178;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .order-table th, .order-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .order-table th {
+            background-color: #088178;
+            color: white;
+        }
+        .product-info {
+            display: flex;
+            align-items: center;
+        }
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        .order-total {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .order-total p {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: white;
+            background-color: #088178;
+        }
+        @media (max-width: 600px) {
+            .order-info-item {
+                flex-basis: 100%;
+            }
+            .product-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .product-image {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="order-header">
+        <h1>Order Details</h1>
+        <p>Order #1234567 - <%= orders.createdAt.toDateString() %></p>
+        
+    </div>
+
+    <div class="order-info">
+        <div class="order-info-item">
+            <h2>Shipping Address</h2>
+            <p>
+                <%= orders.billingAddress.name %><br>
+                <%= orders.billingAddress.address %><br>
+                <%= orders.billingAddress.state %><br>
+                <%= orders.billingAddress.city %><br>
+                <%= orders.billingAddress.pincode %><br>
+                
+            </p>
+        </div>
+        <div class="order-info-item">
+            <h2>Payment Method</h2>
+            <p>
+                <%= orders.paymentMethod %><br>
+                
+            </p>
+        </div>
+        <div class="order-info-item">
+            <h2>Order Summary</h2>
+            <p>
+                Total:<%= orders.totalPrice %><br>
+                Discount:<%= orders.discount %><br>
+                
+            </p>
+        </div>
+    </div>
+
+    <table class="order-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment Method</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% orders.items.forEach(item => { %>
+                <tr>
+                    <td>
+                        <div class="product-info">
+                            <% if (item.product && item.product.colors && item.product.colors[item.color] && item.product.colors[item.color].images.length > 0) { %>
+                                <img src="/uploads/<%= item.product.colors[item.color].images[0] %>" alt="<%= item.product.name %>" class="product-image" style="width: 60px; height: auto;">
+                            <% } else { %>
+                                <p>Image not available</p>
+                            <% } %>
+                            <span><%= item.product ? item.product.name : 'Product not found' %></span>
+                        </div>
+                    </td>
+                    <td>Rs.<%= item.price.toFixed(2) %></td>
+                    <td><%= item.quantity %></td>
+                    <td>Rs.<%= (item.price * item.quantity).toFixed(2) %></td>
+    
+                    <!-- Status with conditional styling -->
+                    <td style="color: <%= item.status === 'Cancelled' ? 'red' : (item.status === 'Delivered' ? 'green' : 'black') %>;">
+                        <%= item.status %>
+                    </td>
+    
+                    <td><%= orders.paymentMethod %></td>
+                    <td>
+                        <% if (item.status === 'Delivered') { %>
+                            <button onclick="returnItem('<%= orders._id %>', '<%= item._id %>', this)" 
+                                    class="btn btn-warning" 
+                                    style="background-color: #088178; border-color: #088178; color: white;">
+                                Return
+                            </button>
+                        <% } else if (item.status === 'Pending' || item.status === 'Confirmed') { %>
+                            <button onclick="cancelItem('<%= orders._id %>', '<%= item._id %>', this)" 
+                                    class="btn btn-danger" 
+                                    style="background-color: #088178; border-color: #088178; color: white;">
+                                Cancel
+                            </button>
+                        <% } else if (item.status === 'Cancelled' || item.status === 'Returned') { %>
+                            <span><%= item.status %></span>
+                        <% } %>
+                    
+                       
+                        
+                    </td>
+                    
+                </tr>
+            <% }) %>
+        </tbody>
+        <button onclick="window.location.href='/user/download-invoice/<%= orders._id %>'" 
+            class="btn btn-primary" 
+            style="background-color: white; border-color: #088178; color: #088178;">
+        Download Invoice
+        </button>
+    </table>
+    
+    
+
+    <div class="order-total">
+        <p>Total:Rs.<%= orders.totalPrice %></p>
+    </div>
+
+    <script>
+        // Function to handle cancellation
+        function cancelItem(orderId, itemId, button) {
+    // Send an AJAX request to cancel the item
+    fetch(`/user/order/cancel/${orderId}/${itemId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // You can either update the UI here or simply reload the page
+            window.location.reload(); // This will refresh the entire page and reflect the updated status
+        } else {
+            alert('Failed to cancel item');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error while canceling item');
+    });
+}
+
+function returnItem(orderId, itemId, button) {
+    // Similar to cancelItem function for handling returns
+    fetch(`/user/order/return/${orderId}/${itemId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // You can either update the UI here or simply reload the page
+            window.location.reload(); // Refresh the page after returning the item
+        } else {
+            alert('Failed to return item');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error while returning item');
+    });
+}
+    </script>
+    
+</body>
+</html>

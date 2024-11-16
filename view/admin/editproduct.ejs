@@ -338,7 +338,7 @@
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
             <a href="index.html" class="brand-wrap">
-                <img src="http://localhost:3000/admin/assets/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+                <img src="assets/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
@@ -346,7 +346,7 @@
         </div>
         <nav>
             <ul class="menu-aside">
-                <li class="menu-item">
+                <li class="menu-item ">
                     <a class="menu-link" href="home"> <i class="icon material-icons md-home"></i>
                         <span class="text">Dashboard</span>
                     </a>
@@ -356,7 +356,7 @@
                         <span class="text">Products</span>
                     </a>
                     <!-- <div class="submenu">
-                        <a href="page-products-list.html">Product List</a>
+                        <a href="page-products-list.html" class="active">Product List</a>
                         <a href="page-products-grid.html">Product grid</a>
                         <a href="page-products-grid-2.html">Product grid 2</a>
                         <a href="page-categories.html">Categories</a>
@@ -372,27 +372,27 @@
                         <a href="page-orders-detail.html">Order detail</a>
                     </div> -->
                 </li>
-                <!-- <li class="menu-item has-submenu">
+                <!-- <li class="menu-item ">
                     <a class="menu-link" href="page-sellers-cards.html"> <i class="icon material-icons md-store"></i>
                         <span class="text">Sellers</span>
-                    </a>
-                    <div class="submenu">
+                    </a> -->
+                    <!-- <div class="submenu">
                         <a href="page-sellers-cards.html">Sellers cards</a>
                         <a href="page-sellers-list.html">Sellers list</a>
                         <a href="page-seller-detail.html">Seller profile</a>
-                    </div>
-                </li> -->
-                <!-- <li class="menu-item has-submenu active">
+                    </div> -->
+                <!-- </li> -->
+                <!-- <li class="menu-item has-submenu">
                     <a class="menu-link" href="page-form-product-1.html"> <i class="icon material-icons md-add_box"></i>
                         <span class="text">Add product</span>
-                    </a> -->
-                    <!-- <div class="submenu">
-                        <a href="page-form-product-1.html" class="active">Add product 1</a>
+                    </a>
+                    <div class="submenu">
+                        <a href="page-form-product-1.html">Add product 1</a>
                         <a href="page-form-product-2.html">Add product 2</a>
                         <a href="page-form-product-3.html">Add product 3</a>
                         <a href="page-form-product-4.html">Add product 4</a>
-                    </div> -->
-                <!-- </li> -->
+                    </div>
+                </li> -->
                 <!-- <li class="menu-item has-submenu">
                     <a class="menu-link" href="page-transactions-1.html"> <i class="icon material-icons md-monetization_on"></i>
                         <span class="text">Transactions</span>
@@ -411,17 +411,17 @@
                         <a href="page-account-register.html">User registration</a>
                         <a href="page-error-404.html">Error 404</a>
                     </div>
-                </li>
-                <li class="menu-item">
+                </li> -->
+                <!-- <li class="menu-item">
                     <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
                         <span class="text">Reviews</span>
-                    </a> -->
-                </li>
+                    </a>
+                </li> -->
                 <li class="menu-item">
                     <a class="menu-link" href="brands"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Brands</span> </a>
                 </li>
-                <li class="menu-item ">
+                <li class="menu-item">
                     <a class="menu-link" href="category"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Categories</span> </a>
                 </li>
@@ -429,14 +429,26 @@
                     <a class="menu-link" href="users"> <i class="icon material-icons md-person"></i>
                         <span class="text">users</span> </a>
                 </li>
+                <li class="menu-item ">
+                    <a class="menu-link" href="coupon"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Coupon</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="offers"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Offers</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="salesreport"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Sales Report</span> </a>
+                </li>
                 <!-- <li class="menu-item">
                     <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
                         <span class="text">Statistics</span>
                     </a>
                 </li> -->
             </ul>
-            <!-- <hr>
-            <ul class="menu-aside">
+            <hr>
+            <!-- <ul class="menu-aside">
                 <li class="menu-item has-submenu">
                     <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
                         <span class="text">Settings</span>
@@ -554,25 +566,33 @@
           
                               <!-- Category & Brand -->
                               <div class="row mb-4">
-                                  <div class="col-md-6">
-                                      <label class="form-label">Category</label>
-                                      <select class="form-select" name="product_category">
-                                          <% category.forEach(element => { %>
-                                              <option value="<%= element._id %>"> <%= element.name %> </option>
-                                          <% }); %>
-                                      </select>
-                                      <span id="categoryError" class="error-message text-danger"></span>
-                                  </div>
-                                  <div class="col-md-6">
-                                      <label class="form-label">Brand</label>
-                                      <select class="form-select" name="product_brand">
-                                          <% brand.forEach(element => { %>
-                                              <option value="<%= element._id %>"> <%= element.name %> </option>
-                                          <% }); %>
-                                      </select>
-                                      <span id="brandError" class="error-message text-danger"></span>
-                                  </div>
-                              </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Category</label>
+                                    <select class="form-select" name="product_category" id="product_category" required>
+                                        <option value="" disabled>Select Category</option>
+                                        <% category.forEach(element => { %>
+                                            <option value="<%= element._id %>" <%= element._id.equals(product.category._id) ? 'selected' : '' %>> 
+                                                <%= element.name %> 
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                    <span id="categoryError" class="error-message text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Brand</label>
+                                    <select class="form-select" name="product_brand" id="product_brand" required>
+                                        <option value="" disabled>Select Brand</option>
+                                        <% brand.forEach(element => { %>
+                                            <option value="<%= element._id %>" <%= element._id.equals(product.brandname._id) ? 'selected' : '' %>> 
+                                                <%= element.name %> 
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                    <span id="brandError" class="error-message text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            
           
                               <!-- Color Quantities and Image Uploads -->
                               <div class="color-quantities-container">
@@ -607,24 +627,24 @@
                               </div>
           
                               <!-- Size Quantities -->
-                              <div class="mb-4">
+                              <!-- <div class="mb-4">
                                   <h5>Size Quantities</h5>
                                   <div class="row">
                                       <div class="col-md-4">
                                           <label for="small" class="form-label">Small</label>
-                                          <input type="text" placeholder="Type here" class="form-control" id="small" name="small" value="<%= product.size.s.quantity %>">
+                                          <input type="text" placeholder="Type here" class="form-control" id="small" name="small" value="<%#= product.size.s.quantity %>">
                                       </div>
                                       <div class="col-md-4">
                                           <label for="medium" class="form-label">Medium</label>
-                                          <input type="text" placeholder="Type here" class="form-control" id="medium" name="medium" value="<%= product.size.m.quantity %>">
+                                          <input type="text" placeholder="Type here" class="form-control" id="medium" name="medium" value="<%#= product.size.m.quantity %>">
                                       </div>
                                       <div class="col-md-4">
                                           <label for="large" class="form-label">Large</label>
-                                          <input type="text" placeholder="Type here" class="form-control" id="large" name="large" value="<%= product.size.l.quantity %>">
+                                          <input type="text" placeholder="Type here" class="form-control" id="large" name="large" value="<%#= product.size.l.quantity %>">
                                       </div>
                                   </div>
                                   <span id="sizeQuantityError" class="error-message text-danger"></span>
-                              </div>
+                              </div> -->
           
                               <!-- Gender & Frame Color -->
                               <div class="row mb-4">
@@ -812,9 +832,9 @@
             let blackQty = document.getElementById("black_quantity").value;
             let greenQty = document.getElementById("green_quantity").value;
             let yellowQty = document.getElementById("yellow_quantity").value;
-            let small = document.getElementById("small").value;
-            let medium = document.getElementById("medium").value;
-            let large = document.getElementById("large").value;
+            // let small = document.getElementById("small").value;
+            // let medium = document.getElementById("medium").value;
+            // let large = document.getElementById("large").value;
     
             // Product Name validation
             if (!name) {
@@ -855,20 +875,20 @@
                 document.getElementById("colorQuantityError").innerText = "";
             }
     
-            // Size Quantity validation
-            let sizeQuantities = [small, medium, large];
-            let sizeValid = sizeQuantities.some(qty => qty && Number(qty) >= 0);
-            let sizeNegative = sizeQuantities.some(qty => qty && Number(qty) < 0);
+            // // Size Quantity validation
+            // let sizeQuantities = [small, medium, large];
+            // let sizeValid = sizeQuantities.some(qty => qty && Number(qty) >= 0);
+            // let sizeNegative = sizeQuantities.some(qty => qty && Number(qty) < 0);
     
-            if (!sizeValid) {
-                document.getElementById("sizeQuantityError").innerText = "At least one size quantity is required and must be a non-negative number.";
-                isValid = false;
-            } else if (sizeNegative) {
-                document.getElementById("sizeQuantityError").innerText = "Size quantities must be non-negative.";
-                isValid = false;
-            } else {
-                document.getElementById("sizeQuantityError").innerText = "";
-            }
+            // if (!sizeValid) {
+            //     document.getElementById("sizeQuantityError").innerText = "At least one size quantity is required and must be a non-negative number.";
+            //     isValid = false;
+            // } else if (sizeNegative) {
+            //     document.getElementById("sizeQuantityError").innerText = "Size quantities must be non-negative.";
+            //     isValid = false;
+            // } else {
+            //     document.getElementById("sizeQuantityError").innerText = "";
+            // }
     
             return isValid;
         }

@@ -5,7 +5,7 @@ const { generateOtp, sendOtpEmail } = require('../utility/otpUtility')
 const jwt = require('jsonwebtoken')
 const { generateaccessToken, generateRefreshToken } = require('../utility/token')
 const bcrypt = require('bcryptjs')
-
+const walletModel = require('../model/wallet')
 // render login page
 const renderUserLogin = async (req, res) => {
     res.render('userLogin')
@@ -104,6 +104,7 @@ const getOtp = async (req, res) => {
     }
 }
 
+
 // verifying otp
 const verifyOtp = async (req, res) => {
     const userId = req.user
@@ -119,6 +120,7 @@ const verifyOtp = async (req, res) => {
             if (Date.now() > tempuser.otpExpiresAt) {
                 return res.status(400).json({ success: false, message: 'otp expired' })
             }
+
             const user = new User({
                 name: tempuser.name,
                 email: tempuser.email,
@@ -128,7 +130,13 @@ const verifyOtp = async (req, res) => {
             })
 
             await user.save()
-            console.log(user);
+            const wallet = new walletModel({
+                user:user._id,
+                balance:0,
+                transactions:[]
+            })
+            await wallet.save()
+           
             return res.status(200).json({ success: true, message: 'otp verfied and new user registerd' })
         } else {
             res.status(400).json({ success: false, message: 'invalid otp' })

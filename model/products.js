@@ -90,25 +90,14 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    size: {
-        s: {
-            quantity: {
-                type: Number,
-                default: 0,
-            }
-        },
-        m: {
-            quantity: {
-                type: Number,
-                default: 0,
-            }
-        },
-        l: {
-            quantity: {
-                type: Number,
-                default: 0,
-            }
-        }
+    bestOffer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Offer",
+        default: null,
+    },
+    discountedPrice: {
+        type: Number,
+        default: null,
     }
 }, { timestamps: true });
 

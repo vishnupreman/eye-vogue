@@ -203,17 +203,29 @@ button.close:hover {
                         <span class="text">Reviews</span>
                     </a>
                 </li> -->
-                <li class="menu-item ">
+                <li class="menu-item">
                     <a class="menu-link" href="brands"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Brands</span> </a>
                 </li>
-                <li class="menu-item ">
+                <li class="menu-item">
                     <a class="menu-link" href="category"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Categories</span> </a>
                 </li>
                 <li class="menu-item ">
                     <a class="menu-link" href="users"> <i class="icon material-icons md-person"></i>
                         <span class="text">users</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link" href="coupon"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Coupon</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="offers"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Offers</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="salesreport"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Sales Report</span> </a>
                 </li>
                 <!-- <li class="menu-item">
                     <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
@@ -340,48 +352,47 @@ button.close:hover {
                                     <!-- <th scope="col">Email</th> -->
                                     <th scope="col">Total</th>
                                     <th scope="col">Status</th>
+                                    <th scope="col">Quantity</th>
                                     <th scope="col">Date</th>
-                                    <th scope="col" class="text-end"> Action </th>
+                                    <th scope="col" class="text-end">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <%orders.forEach((element,index) => { %>
-                                <tr>
-                                    <td><%= index + 1 %></td>
-                                    <td><b><%= element.billingAddress.name %></b></td>
-                                    <!-- <td><template class="__cf_email__" data-cfemail="aec3cfdcd8c7c0eecbd6cfc3dec2cb80cdc1c3">[email&#160;protected]</template></td> -->
-                                    <td><%= element.totalPrice %></td>
-                                    <td>
-                                        <span class="badge rounded-pill alert-<%= 
-                                            element.status === 'Pending' ? 'warning' : 
-                                            element.status === 'Shipped' || element.status === 'Delivered' ? 'success' : 
-                                            element.status === 'Cancelled' ? 'danger' : 'primary' 
-                                        %> text-<%= 
-                                            element.status === 'Pending' ? 'warning' : 
-                                            element.status === 'Shipped' || element.status === 'Delivered' ? 'success' : 
-                                            element.status === 'Cancelled' ? 'danger' : 'primary' 
-                                        %>"><%= element.status %>
-                                        </span>
-                                    </td>
-                                    <td><%= element.createdAt.toDateString() %></td>
-                                    <td class="text-end">
-                                        <a href="/admin/orderdetails/<%= element._id %>" class="btn btn-md rounded font-sm">Detail</a>
-                                        <button  class="btn btn-md rounded font-sm" type="button" onclick="openModal('<%= element._id %>')">Cancel</button>
-                                        <!-- <div class="dropdown">
-                                            <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">View detail</a>
-                                                <a class="dropdown-item" href="#">Edit info</a>
-                                                <a class="dropdown-item text-danger" href="#">Delete</a>
-                                            </div>
-                                        </div>  -->
-                                    </td>
-                                </tr>
+                                <% orders.forEach((order, index) => { %>
+                                    <% order.items.forEach((item, itemIndex) => { %>
+                                        <tr>
+                                            <% if (itemIndex === 0) { %>
+                                                <td rowspan="<%= order.items.length %>"><%= index + 1 %></td>
+                                                <td rowspan="<%= order.items.length %>"><b><%= order.billingAddress.name %></b></td>
+                                                <td rowspan="<%= order.items.length %>"><%= order.totalPrice %></td>
+                                                <td rowspan="<%= order.items.length %>">
+                                                    <span class="badge rounded-pill alert-<%= 
+                                                        order.status === 'Pending' ? 'warning' : 
+                                                        order.status === 'Shipped' || order.status === 'Delivered' ? 'success' : 
+                                                        order.status === 'Cancelled' ? 'danger' : 'primary' 
+                                                    %> text-<%= 
+                                                        order.status === 'Pending' ? 'warning' : 
+                                                        order.status === 'Shipped' || order.status === 'Delivered' ? 'success' : 
+                                                        order.status === 'Cancelled' ? 'danger' : 'primary' 
+                                                    %>"><%= order.status %>
+                                                    </span>
+                                                </td>
+                                            <% } %>
+                                            <td><%= item.quantity %></td>
+                                            <% if (itemIndex === 0) { %>
+                                                <td rowspan="<%= order.items.length %>"><%= order.createdAt.toDateString() %></td>
+                                                <td rowspan="<%= order.items.length %>" class="text-end">
+                                                    <a href="/admin/orderdetails/<%= order._id %>" class="btn btn-md rounded font-sm">Details</a>
+                                                </td>
+                                            <% } %>
+                                        </tr>
+                                    <% }); %>
                                 <% }); %>
                             </tbody>
                         </table>
                     </div> <!-- table-responsive //end -->
-                </div> <!-- card-body end// -->
+                </div>
+                   <!-- card-body end// -->
             </div> <!-- card end// -->
             <div class="pagination-area mt-15 mb-50">
                 <nav aria-label="Page navigation example">
@@ -411,23 +422,7 @@ button.close:hover {
             </div>
             <div id="toast" class="toast"></div>
             <!-- Custom Confirmation Modal -->
-            <div id="confirmationModal" class="modal">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Cancel Order</h5>
-                            <button type="button" class="close" onclick="closeModal()">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Are you sure you want to cancel this order?</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-danger" onclick="confirmCancelOrder()">Yes</button>
-                            <button class="btn btn-secondary" onclick="closeModal()">No</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
 
         </footer>
     </main>
@@ -438,48 +433,7 @@ button.close:hover {
     <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
     <!-- Main Script -->
     <script src="assets/js/main.js" type="text/javascript"></script>
-    <script>
-        let currentOrderId = null;
-        
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = 'toast show';
-            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
-        }
-        
-        function openModal(orderId) {
-            currentOrderId = orderId;
-            const modal = document.getElementById('confirmationModal');
-            modal.style.display = 'block';
-        }
-        
-        function closeModal() {
-            const modal = document.getElementById('confirmationModal');
-            modal.style.display = 'none';
-        }
-        
-        function confirmCancelOrder() {
-            fetch(`/admin/cancelorder/${currentOrderId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            }).then(response => response.json()).then(data => {
-                if (data.success) {
-                    showToast('Order canceled successfully');
-                    setTimeout(() => { location.reload(); }, 3000); // Reload the page to reflect changes after the toast notification
-                } else {
-                    showToast(data.message);
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-                showToast('Error canceling order');
-            });
-            closeModal();
-        }
-        </script>
+    
 </body>
 
 

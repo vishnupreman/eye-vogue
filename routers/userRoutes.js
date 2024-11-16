@@ -5,7 +5,10 @@ const { renderHome, renderProductPage, renderMyAccount, editUserName, renderEdit
     enteredAddress, renderEditAddress, editAddress, deleteAddress, addToCart,
     renderCartPage, updateQuantity, removeProductCart,renderCheckOutPage ,
     placeOrder,renderOrderConfrimPage,renderOrderPage,cancelOrder,returnOrder,
-    renderShop,filterShop} = require('../controllers/user.controller')
+    renderShop,filterShop,showCoupons,applyCoupon,removeCoupon,
+    verifyRazorPay,renderWishList,addToWishList,removeFromWishList,orderDetailedPage,
+    renderWalletPage,
+    downloadInvoice} = require('../controllers/user.controller')
 
 router.route('/home').get(renderHome)
 
@@ -34,13 +37,31 @@ router.route('/cart/removeitem').post(removeProductCart)
 router.route('/checkout').get(renderCheckOutPage)
 router.route('/placeorder').post(placeOrder)
 router.route('/orderconfirmed/:id').get(renderOrderConfrimPage)
+router.route('/verify-payment').post(verifyRazorPay)
 
 ///orderpage
 router.route('/myorder').get(renderOrderPage)
-router.route('/ordercancel/:orderId').post(cancelOrder)
-router.route('/orderreturn/:orderId').post(returnOrder)
+router.route('/order/details/:id').get(orderDetailedPage)
+router.route('/download-invoice/:id').get(downloadInvoice)
+router.route('/order/cancel/:orderId/:itemId').post(cancelOrder)
+router.route('/order/return/:orderId/:itemId').post(returnOrder)
 
 //shop
 router.route('/shop').get(renderShop)
 router.route('/shopfilter').get(filterShop)
+
+
+//coupons
+router.route('/showCoupons').get(showCoupons)
+router.route('/applycoupon').post(applyCoupon)
+router.route('/removecoupon').post(removeCoupon)
+
+//wishlist
+router.route('/wishlist').get(renderWishList)
+router.route('/addwishlist').post(addToWishList)
+router.route('/remove-from-wishlist').post(removeFromWishList)
+
+//wallet
+router.route('/wallet').get(renderWalletPage)
+
 module.exports = router

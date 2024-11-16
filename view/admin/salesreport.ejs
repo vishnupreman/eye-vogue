@@ -2,7 +2,7 @@
 <html lang="en">
 
 
-<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-products-list.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:00 GMT -->
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-orders-1.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:21 GMT -->
 <head>
     <meta charset="utf-8">
     <title>Evara Dashboard</title>
@@ -37,7 +37,7 @@
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
-                <li class="menu-item active">
+                <li class="menu-item ">
                     <a class="menu-link" href="products"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text">Products</span>
                     </a>
@@ -123,7 +123,7 @@
                     <a class="menu-link " href="offers"> <i class="icon material-icons md-person"></i>
                         <span class="text">Offers</span> </a>
                 </li>
-                <li class="menu-item ">
+                <li class="menu-item active">
                     <a class="menu-link " href="salesreport"> <i class="icon material-icons md-person"></i>
                         <span class="text">Sales Report</span> </a>
                 </li>
@@ -154,7 +154,6 @@
             <br>
         </nav>
     </aside>
-    
     <main class="main-wrap">
         <header class="main-header navbar">
             <div class="col-search">
@@ -212,76 +211,117 @@
         </header>
         <section class="content-main">
             <div class="content-header">
-                <p style="color: green;"><%= success_message %></p>
                 <div>
-                    <h2 class="content-title card-title">Products List</h2>
-                    <!-- <p>Lorem ipsum dolor sit amet.</p> -->
-                </div>
-                <div>
-                    <!-- <a href="#" class="btn btn-light rounded font-md">Export</a>
-                    <a href="#" class="btn btn-light rounded  font-md">Import</a> -->
-                    <a href="addproducts" class="btn btn-primary btn-sm rounded">Add New Product</a>
+                    <h2 class="content-title card-title">Sales Report </h2>
                    
                 </div>
+                <div>
+                    <input type="text" placeholder="Search order ID" class="form-control bg-white">
+                </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Images</th>
-                                <th scope="col">Title</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Stock</th>
-                                <th scope="col">Status</th>
-                                <th scope="col" class="text-end"> Action </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% product.forEach(element => { %>
-                            <tr>
-                                <td>
-                                    <%# for (let color in element.colors) { %>
-                            <!-- <img src="/uploads/<%#= element.colors[color].images[0] %>" width="60" class="img-fluid" style="margin: 5px;"> -->
-                                <%# } %>
+            <div class="card mb-4">
+                <header class="card-header">
+                    <div class="row gx-3">
+                        <div class="col-lg-3 col-md-4">
+                            <!-- Start Date Filter -->
+                            <form action="/admin/salesreport" method="GET" class="d-flex">
+                                <label for="startDate" class="me-2">Start Date:</label>
+                                <input type="date" name="startDate" class="form-control" value="<%= startDate || '' %>">
+                        </div>
+                        <div class="col-lg-3 col-md-4">
+                            <!-- End Date Filter -->
+                                <label for="endDate" class="me-2">End Date:</label>
+                                <input type="date" name="endDate" class="form-control" value="<%= endDate || '' %>">
+                        </div>
+                        <div class="col-lg-3 col-md-4">
+                            <!-- Filter by Day, Week, or Month -->
+                            <select name="timeFilter" class="form-select" onchange="this.form.submit()">
+                                <option value="">Select Time Period</option>
+                                <option value="day" <%= timeFilter === 'day' ? 'selected' : '' %>>Day</option>
+                                <option value="week" <%= timeFilter === 'week' ? 'selected' : '' %>>Week</option>
+                                <option value="month" <%= timeFilter === 'month' ? 'selected' : '' %>>Month</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-2 d-flex align-items-end">
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary btn-xs" style="margin-bottom: 24px;">Apply Filter</button>
+                        </div>
+                    </form>
+            
+                    <!-- Download Buttons for Excel and PDF -->
+                    <div class="d-flex justify-content-start">
+                        <a href="/admin/download-excel-salesreport?startDate=<%= startDate %>&endDate=<%= endDate %>&timeFilter=<%= timeFilter %>" class="btn btn-primary btn-xs me-2">
+                            Download Excel
+                        </a>
+                        <a href="/admin/download-pdf-salesreport?startDate=<%= startDate %>&endDate=<%= endDate %>&timeFilter=<%= timeFilter %>" class="btn btn-danger btn-xs">
+                            Download PDF
+                        </a>
+                    </div>
+                    
+                    
+                    
+                    
+                    
 
-                                <% for (let color in element.colors) { %>
-                                    <% let colorObj = element.colors[color] %>
-                                    <% if (colorObj && colorObj.images && colorObj.images.length > 0) { %>
-                                        <img src="/uploads/<%= colorObj.images[0] %>" width="60" class="img-fluid" style="margin: 5px;">
-                                    <% } %>
+
+                </header> <!-- card-header end// -->
+            
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Discount</th>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                  
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% orders.forEach(order => { %>
+                                    <tr>
+                                        <td><%= order._id %></td>
+                                       
+                                        <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                                        <td>Rs.<%= order.discount.toFixed(2) %></td>
+                                        <td>Rs.<%= order.totalPrice.toFixed(2) %></td>
+                                        <td><%= order.paymentMethod %></td>
+                                        
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+            
+                        <!-- Pagination -->
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <% if (pagination.hasPreviousPage) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= pagination.previousPage %>&startDate=<%= startDate %>&endDate=<%= endDate %>&timeFilter=<%= timeFilter %>">Previous</a>
+                                    </li>
                                 <% } %>
-
-                                </td>
-                                <td><%= element.description %></td>
-                                <td><%= element.name %></td>
-                                <td><%= element.stock %></td>
-                                <td>
-                                    <% if (element.isPublished) { %>
-                                        <span class="badge rounded-pill alert-success">Published</span>
-                                    <% }else{ %>
-                                        <span class="badge rounded-pill alert-danger">Unpublished</span>
-                                    <% } %>
-                                </td>
-                                <td class="text-end">
-                                    <a href="/admin/editproduct/<%= element._id %>" class="btn btn-md rounded font-sm">Edit</a>
-                                    <% if (element.isPublished) { %>
-                                     <form action="/admin/unpublish-product/<%= element._id %>" method="post">
-                                        <button class=" btn btn-outline-warning btn-sm" type="submit" style="    margin-top: 7px;">Unpublish</button>
-                                     </form>
-                                    <% }else{%>
-                                        <form action="/admin/publish-product/<%= element._id %>" method="post">
-                                            <button class=" btn btn-outline-warning btn-sm" type="submit" style=" margin-top: 7px;">Publish</button>
-                                        </form>
-                                    <% } %>
-                                </td>
-                            </tr>
-                      <%  }); %>
-                        </tbody>
-                    </table>
-                </div> <!-- table-responsive //end -->
-            </div> <!-- card-body end// -->
-            <div class="pagination-area mt-30 mb-50">
+                                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                                    <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %>&startDate=<%= startDate %>&endDate=<%= endDate %>&timeFilter=<%= timeFilter %>"><%= i %></a>
+                                    </li>
+                                <% } %>
+                                <% if (pagination.hasNextPage) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= pagination.nextPage %>&startDate=<%= startDate %>&endDate=<%= endDate %>&timeFilter=<%= timeFilter %>">Next</a>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </nav>
+            
+                    </div> <!-- table-responsive //end -->
+                </div> <!-- card-body end// -->
+            </div>
+            
+            
+             <!-- card end// -->
+            <!-- <div class="pagination-area mt-15 mb-50">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-start">
                         <li class="page-item active"><a class="page-link" href="#">01</a></li>
@@ -292,12 +332,12 @@
                         <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
                     </ul>
                 </nav>
-            </div>
+            </div> -->
         </section> <!-- content-main end// -->
         <footer class="main-footer font-xs">
             <div class="row pb-30 pt-15">
                 <div class="col-sm-6">
-                    <script>
+                    <script data-cfasync="false" src="../../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
                     document.write(new Date().getFullYear())
                     </script> ©, Evara - HTML Ecommerce Template .
                 </div>
@@ -319,5 +359,5 @@
 </body>
 
 
-<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-products-list.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:12 GMT -->
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-orders-1.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:22 GMT -->
 </html>

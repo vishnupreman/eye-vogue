@@ -122,7 +122,7 @@
         </div>
         <nav>
             <ul class="menu-aside">
-                <li class="menu-item">
+                <li class="menu-item ">
                     <a class="menu-link" href="home"> <i class="icon material-icons md-home"></i>
                         <span class="text">Dashboard</span>
                     </a>
@@ -132,7 +132,7 @@
                         <span class="text">Products</span>
                     </a>
                     <!-- <div class="submenu">
-                        <a href="page-products-list.html">Product List</a>
+                        <a href="page-products-list.html" class="active">Product List</a>
                         <a href="page-products-grid.html">Product grid</a>
                         <a href="page-products-grid-2.html">Product grid 2</a>
                         <a href="page-categories.html">Categories</a>
@@ -148,27 +148,27 @@
                         <a href="page-orders-detail.html">Order detail</a>
                     </div> -->
                 </li>
-                <!-- <li class="menu-item has-submenu">
+                <!-- <li class="menu-item ">
                     <a class="menu-link" href="page-sellers-cards.html"> <i class="icon material-icons md-store"></i>
                         <span class="text">Sellers</span>
-                    </a>
-                    <div class="submenu">
+                    </a> -->
+                    <!-- <div class="submenu">
                         <a href="page-sellers-cards.html">Sellers cards</a>
                         <a href="page-sellers-list.html">Sellers list</a>
                         <a href="page-seller-detail.html">Seller profile</a>
-                    </div>
-                </li> -->
-                <!-- <li class="menu-item has-submenu active">
+                    </div> -->
+                <!-- </li> -->
+                <!-- <li class="menu-item has-submenu">
                     <a class="menu-link" href="page-form-product-1.html"> <i class="icon material-icons md-add_box"></i>
                         <span class="text">Add product</span>
-                    </a> -->
-                    <!-- <div class="submenu">
-                        <a href="page-form-product-1.html" class="active">Add product 1</a>
+                    </a>
+                    <div class="submenu">
+                        <a href="page-form-product-1.html">Add product 1</a>
                         <a href="page-form-product-2.html">Add product 2</a>
                         <a href="page-form-product-3.html">Add product 3</a>
                         <a href="page-form-product-4.html">Add product 4</a>
-                    </div> -->
-                <!-- </li> -->
+                    </div>
+                </li> -->
                 <!-- <li class="menu-item has-submenu">
                     <a class="menu-link" href="page-transactions-1.html"> <i class="icon material-icons md-monetization_on"></i>
                         <span class="text">Transactions</span>
@@ -187,17 +187,17 @@
                         <a href="page-account-register.html">User registration</a>
                         <a href="page-error-404.html">Error 404</a>
                     </div>
-                </li>
-                <li class="menu-item">
+                </li> -->
+                <!-- <li class="menu-item">
                     <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
                         <span class="text">Reviews</span>
-                    </a> -->
-                </li>
-                <li class="menu-item">
+                    </a>
+                </li> -->
+                <li class="menu-item ">
                     <a class="menu-link" href="brands"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Brands</span> </a>
                 </li>
-                <li class="menu-item ">
+                <li class="menu-item">
                     <a class="menu-link" href="category"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Categories</span> </a>
                 </li>
@@ -205,14 +205,26 @@
                     <a class="menu-link" href="users"> <i class="icon material-icons md-person"></i>
                         <span class="text">users</span> </a>
                 </li>
+                <li class="menu-item ">
+                    <a class="menu-link" href="coupon"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Coupon</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="offers"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Offers</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="salesreport"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Sales Report</span> </a>
+                </li>
                 <!-- <li class="menu-item">
                     <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
                         <span class="text">Statistics</span>
                     </a>
                 </li> -->
             </ul>
-            <!-- <hr>
-            <ul class="menu-aside">
+            <hr>
+            <!-- <ul class="menu-aside">
                 <li class="menu-item has-submenu">
                     <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
                         <span class="text">Settings</span>
@@ -403,7 +415,7 @@
                                   
             
                                 <!-- Size Quantities -->
-                                <div class="mb-4">
+                                <!-- <div class="mb-4">
                                     <h5>Size Quantities</h5>
                                     <div class="row">
                                         <div class="col-md-4">
@@ -420,7 +432,7 @@
                                         </div>
                                     </div>
                                     <span id="sizeQuantityError" class="error-message text-danger"></span>
-                                </div>
+                                </div> -->
             
                                 <!-- Gender & Frame Color -->
                                 <div class="row mb-4">
@@ -544,16 +556,16 @@
         let blackQty = document.getElementById("black_quantity").value;
         let greenQty = document.getElementById("green_quantity").value;
         let yellowQty = document.getElementById("yellow_quantity").value;
-        let small = document.getElementById("small").value;
-        let medium = document.getElementById("medium").value;
-        let large = document.getElementById("large").value;
+        // let small = document.getElementById("small").value;
+        // let medium = document.getElementById("medium").value;
+        // let large = document.getElementById("large").value;
 
         // Clear previous error messages
         document.getElementById("nameError").innerText = "";
         document.getElementById("descriptionError").innerText = "";
         document.getElementById("priceError").innerText = "";
         document.getElementById("colorQuantityError").innerText = "";
-        document.getElementById("sizeQuantityError").innerText = "";
+        // document.getElementById("sizeQuantityError").innerText = "";
 
         // Product Name validation
         if (!name.trim()) {
@@ -600,29 +612,29 @@
         }
 
         // Size Quantity validation (must be non-negative and at least one required)
-        let hasSizeQty = false;
-        let sizeQuantities = [
-            { qty: small, id: "small" },
-            { qty: medium, id: "medium" },
-            { qty: large, id: "large" }
-        ];
+        // let hasSizeQty = false;
+        // let sizeQuantities = [
+        //     { qty: small, id: "small" },
+        //     { qty: medium, id: "medium" },
+        //     { qty: large, id: "large" }
+        // ];
 
-        for (let size of sizeQuantities) {
-            if (size.qty) {
-                if (isNaN(size.qty) || parseInt(size.qty) < 0) {
-                    document.getElementById("sizeQuantityError").innerText = "Size quantities cannot be negative.";
-                    isValid = false;
-                    break;
-                } else {
-                    hasSizeQty = true;
-                }
-            }
-        }
+        // for (let size of sizeQuantities) {
+        //     if (size.qty) {
+        //         if (isNaN(size.qty) || parseInt(size.qty) < 0) {
+        //             document.getElementById("sizeQuantityError").innerText = "Size quantities cannot be negative.";
+        //             isValid = false;
+        //             break;
+        //         } else {
+        //             hasSizeQty = true;
+        //         }
+        //     }
+        // }
 
-        if (!hasSizeQty && isValid) {
-            document.getElementById("sizeQuantityError").innerText = "At least one size quantity is required.";
-            isValid = false;
-        }
+        // if (!hasSizeQty && isValid) {
+        //     document.getElementById("sizeQuantityError").innerText = "At least one size quantity is required.";
+        //     isValid = false;
+        // }
 
         return isValid;
     }

@@ -17,6 +17,8 @@
     <link rel="shortcut icon" type="image/x-icon" href=http://localhost:3000/user/assets/imgs/theme/favicon.svg">
     <!-- Template CSS -->
     <link rel="stylesheet" href="http://localhost:3000/user/assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         color-btn {
     cursor: pointer;
@@ -63,6 +65,25 @@
 @keyframes fadeout {
     from {bottom: 30px; opacity: 1;}
     to {bottom: 0; opacity: 0;}
+}
+
+
+.button-add-to-wishlist {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5em;
+    color: #ff4d4d; /* Red color for the heart */
+    outline: none;
+    transition: color 0.3s;
+}
+
+.button-add-to-wishlist .fa-heart {
+    transition: transform 0.2s;
+}
+
+.button-add-to-wishlist .fa-heart:hover {
+    transform: scale(1.2); /* Heart enlarges slightly on hover */
 }
 
     </style>
@@ -268,7 +289,7 @@
                         <div class="header-action-right">
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
-                                    <a href="shop-wishlist.html">
+                                    <a href="/user/wishlist">
                                         <img class="svgInject" alt="Evara" src="http://localhost:3000/user/assets/imgs/theme/icons/icon-heart.svg">
                                         <span class="pro-count blue">4</span>
                                     </a>
@@ -643,7 +664,7 @@
                     <div class="header-action-right d-block d-lg-none">
                         <div class="header-action-2">
                             <div class="header-action-icon-2">
-                                <a href="shop-wishlist.html">
+                                <a href="">
                                     <img alt="Evara" src="http://localhost:3000/user/assets/imgs/theme/icons/icon-heart.svg">
                                     <span class="pro-count white">4</span>
                                 </a>
@@ -941,11 +962,21 @@
                                         </div>
                                         <div class="clearfix product-price-cover">
                                             <div class="product-price primary-color float-left">
-                                                <ins><span class="text-brand">Rs.<%= products.price %></span></ins>
-                                                <ins><span class="old-price font-md ml-15">$200.00</span></ins>
-                                                <span class="save-price  font-md color3 ml-15">25% Off</span>
+                                                <% if (products.discountedPrice) { %>
+                                                    <!-- Display discounted price -->
+                                                    <ins><span class="text-brand">Rs.<%= products.discountedPrice.toFixed(2) %></span></ins>
+                                                    <del><span class="old-price font-md ml-15">Rs.<%= products.price.toFixed(2) %></span></del>
+                                                    
+                                                    <!-- Calculate and display discount percentage -->
+                                                    <% const discountPercent = ((products.price - products.discountedPrice) / products.price) * 100; %>
+                                                    <span class="save-price font-md color3 ml-15"><%= discountPercent.toFixed(0) %>% Off</span>
+                                                <% } else { %>
+                                                    <!-- Display original price only if no discount -->
+                                                    <ins><span class="text-brand">Rs.<%= products.price.toFixed(2) %></span></ins>
+                                                <% } %>
                                             </div>
                                         </div>
+                                    
                                         <div class="bt-1 border-color-1 mt-15 mb-15"></div>
                                         <div class="short-desc mb-30">
                                             <p> <%= products.description %></p>
@@ -957,6 +988,8 @@
                                                 <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
                                             </ul>
                                         </div>
+                                        
+                                        <!-- Color Selection -->
                                         <div class="attr-detail attr-color mb-15">
                                             <div id="colorSelection" class="d-flex gap-2">
                                                 <% Object.keys(products.colors).forEach(color => { %>
@@ -969,30 +1002,47 @@
                                                 <% }) %>
                                             </div>
                                         </div>
-                                        <div class="attr-detail attr-size">
-                                            <strong class="mr-10">Size</strong>
-                                            <ul class="list-filter size-filter font-small">
-                                                <li><a href="#" class="size-option" data-size="s" data-quantity="<%= products.size.s.quantity %>">s</a></li>
-                                                <li><a href="#" class="size-option" data-size="m" data-quantity="<%= products.size.m.quantity %>">m</a></li>
-                                                <li><a href="#" class="size-option" data-size="l" data-quantity="<%= products.size.l.quantity %>">l</a></li>
-                                            </ul>
-                                        </div>
-                                        
+                                    
+                                        <!-- Size Selection (if applicable) -->
+                                        <% if (products.sizes) { %>
+                                            <div class="attr-detail attr-size mb-15">
+                                                <div id="sizeSelection" class="d-flex gap-2">
+                                                    <% Object.keys(products.sizes).forEach(size => { %>
+                                                        <button 
+                                                            class="size-btn" 
+                                                            data-size="<%= size %>"
+                                                            style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px;">
+                                                            <%= size %>
+                                                        </button>
+                                                    <% }) %>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                    
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                                    
                                         <div class="detail-extralink">
                                             <div class="product-extra-link2">
                                                 <button id="addToCartButton" class="button button-add-to-cart" data-product-id="<%= products._id %>">Add to Cart</button>
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                <button id="addToWishlistButton" class="button button-add-to-wishlist" data-product-id="<%= products._id %>">
+                                                    <i class="far fa-heart"></i> <!-- Outline heart icon initially -->
+                                                </button>
+                                                
                                                 <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                             </div>
                                         </div>
+                                    
                                         <ul class="product-meta font-xs color-grey mt-50">
                                             <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
-                                            <li class="mb-5">Tags: <a href="#" rel="tag">Cloth</a>, <a href="#" rel="tag">Women</a>, <a href="#" rel="tag">Dress</a></li>
-                                            <li>Availability: <span class="in-stock text-success ml-5"><span id="quantity"><%= products.quantity %> </span > Items In Stock</span></li>
+                                    
+                                            <li> 
+                                                <span class="in-stock text-success ml-5">
+                                                    <span id="quantity">Available: <span id="colorQuantity">0</span> Items In Stock</span>
+                                                </span>
+                                            </li>
                                         </ul>
-                                        
                                     </div>
+                                    
                                     <!-- Detail Info -->
                                 </div>
                             </div>
@@ -1286,7 +1336,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mt-60">
+                            <!-- <div class="row mt-60">
                                 <div class="col-12">
                                     <h3 class="section-title style-1 mb-30">Related products</h3>
                                 </div>
@@ -1422,18 +1472,18 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="banner-img banner-big wow fadeIn f-none animated mt-50">
+                            </div> -->
+                            <!-- <div class="banner-img banner-big wow fadeIn f-none animated mt-50">
                                 <img class="border-radius-10" src="http://localhost:3000/user/assets/imgs/banner/banner-4.png" alt="">
                                 <div class="banner-text">
                                     <h4 class="mb-15 mt-40">Repair Services</h4>
                                     <h2 class="fw-600 mb-20">We're an Apple <br>Authorised Service Provider</h2>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     <div class="col-lg-3 primary-sidebar sticky-sidebar">
-                        <div class="widget-category mb-30">
+                        <!-- <div class="widget-category mb-30">
                             <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
                             <ul class="categories">
                                 <li><a href="shop-grid-right.html">Shoes & Bags</a></li>
@@ -1444,9 +1494,9 @@
                                 <li><a href="shop-grid-right.html">Jewelry & Watch</a></li>
                                 <li><a href="shop-grid-right.html">Accessories</a></li>
                             </ul>
-                        </div>
+                        </div> -->
                         <!-- Fillter By Price -->
-                        <div class="sidebar-widget price_range range mb-30">
+                        <!-- <div class="sidebar-widget price_range range mb-30">
                             <div class="widget-header position-relative mb-20 pb-10">
                                 <h5 class="widget-title mb-10">Fill by price</h5>
                                 <div class="bt-1 border-color-1"></div>
@@ -1488,9 +1538,9 @@
                                 </div>
                             </div>
                             <a href="shop-grid-right.html" class="btn btn-sm btn-default"><i class="fi-rs-filter mr-5"></i> Fillter</a>
-                        </div>
+                        </div> -->
                         <!-- Product sidebar Widget -->
-                        <div class="sidebar-widget product-sidebar  mb-30 p-30 bg-grey border-radius-10">
+                        <!-- <div class="sidebar-widget product-sidebar  mb-30 p-30 bg-grey border-radius-10">
                             <div class="widget-header position-relative mb-20 pb-10">
                                 <h5 class="widget-title mb-10">New products</h5>
                                 <div class="bt-1 border-color-1"></div>
@@ -1531,15 +1581,15 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
+                        </div> -->
+                        <!-- <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
                             <img src="http://localhost:3000/user/assets/imgs/banner/banner-11.jpg" alt="">
                             <div class="banner-text">
                                 <span>Women Zone</span>
                                 <h4>Save 17% on <br>Office Dress</h4>
                                 <a href="shop-grid-right.html">Shop Now <i class="fi-rs-arrow-right"></i></a>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -1697,8 +1747,9 @@
     <!-- Template  JS -->
     <script src="http://localhost:3000/user/assets/js/main.js"></script>
     <script src="http://localhost:3000/user/assets/js/shop.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script>
+    <!-- <script>
    function showToast(message) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
@@ -1716,14 +1767,14 @@ document.querySelectorAll('.color-btn').forEach(button => {
 });
 
 // Set active class for size options
-document.querySelectorAll('.size-option').forEach(option => {
-    option.addEventListener('click', function(event) {
-        event.preventDefault();
-        document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('active'));
-        this.classList.add('active');
-        console.log(`Selected Size: ${this.getAttribute('data-size')}`);
-    });
-});
+// document.querySelectorAll('.size-option').forEach(option => {
+//     option.addEventListener('click', function(event) {
+//         event.preventDefault();
+//         document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('active'));
+//         this.classList.add('active');
+//         console.log(`Selected Size: ${this.getAttribute('data-size')}`);
+//     });
+// });
 
 document.getElementById('addToCartButton').addEventListener('click', function() {
     const productId = this.getAttribute('data-product-id');
@@ -1731,18 +1782,18 @@ document.getElementById('addToCartButton').addEventListener('click', function() 
     const selectedColorElement = document.querySelector('.color-btn.active');
     const selectedColor = selectedColorElement ? selectedColorElement.getAttribute('data-color') : null;
     // Get selected size
-    const selectedSizeElement = document.querySelector('.size-option.active');
-    const selectedSize = selectedSizeElement ? selectedSizeElement.getAttribute('data-size') : null;
+    // const selectedSizeElement = document.querySelector('.size-option.active');
+    // const selectedSize = selectedSizeElement ? selectedSizeElement.getAttribute('data-size') : null;
 
-    if (!selectedColor || !selectedSize) {
-        showToast('Please select color and size.');
-        return; // Prevent adding to cart if no selection
-    }
+    // if (!selectedColor || !selectedSize) {
+    //     showToast('Please select color and size.');
+    //     return; // Prevent adding to cart if no selection
+    // }
 
     const cartItem = {
         id: productId,
         color: selectedColor,
-        size: selectedSize
+        // size: selectedSize
     };
     console.log(cartItem);
     addToCart(cartItem);
@@ -1766,8 +1817,9 @@ function addToCart(cartItem) {
 }
 
 
-    </script>
-    <script>
+    </script> -->
+
+     <!-- <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Select all size options
             const sizeOptions = document.querySelectorAll('.size-option');
@@ -1789,14 +1841,14 @@ function addToCart(cartItem) {
                 });
             });
         });
-    </script>
+    </script>  -->
     
-    <script>
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', function() {
     const colorButtons = document.querySelectorAll('.color-btn');
     const imageSlider = document.getElementById('productImageSlider');
     const thumbnailSlider = document.getElementById('thumbnailSlider');
-    const products = <%- JSON.stringify(products) %>;
+    const products = <%#- JSON.stringify(products) %>;
 
     // Event listener for each color button
     colorButtons.forEach(button => {
@@ -1829,7 +1881,234 @@ function addToCart(cartItem) {
     });
 });
 
+    </script> -->
+
+    <script>
+        // Show toast message
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show';
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+    
+        // Set active class for color buttons
+        document.querySelectorAll('.color-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                console.log(`Selected Color: ${this.getAttribute('data-color')}`);
+            });
+        });
+    
+        // Handle add to cart button click
+        document.getElementById('addToCartButton').addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+    
+            // Get selected color
+            const selectedColorElement = document.querySelector('.color-btn.active');
+            const selectedColor = selectedColorElement ? selectedColorElement.getAttribute('data-color') : null;
+    
+            // Check if a color is selected
+            if (!selectedColor) {
+                showToast('Please select a color.');
+                return; // Prevent adding to cart if no color is selected
+            }
+    
+            if (selectedColorElement.quantity <= 0) {
+                showToast('Out of stock');
+                return;
+            }
+    
+            const cartItem = {
+                id: productId,
+                color: selectedColor
+            };
+    
+            addToCart(cartItem); // Add to cart
+        });
+    
+        // Add to cart function with AJAX
+        function addToCart(cartItem) {
+            $.ajax({
+                url: 'http://localhost:3000/user/addcart',
+                type: 'POST',
+                data: JSON.stringify(cartItem),
+                contentType: 'application/json',
+                success: function(data) {
+                    console.log('Product added to cart:', data);
+                    showToast('Product added to cart!');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error adding product to cart:', errorThrown);
+                    showToast('Failed to add product to cart.');
+                }
+            });
+        }
+    
+        // Handle add to wishlist button click
+        document.getElementById('addToWishlistButton').addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+    
+            // Get selected color
+            const selectedColorElement = document.querySelector('.color-btn.active');
+            const selectedColor = selectedColorElement ? selectedColorElement.getAttribute('data-color') : null;
+    
+            // Check if a color is selected
+            if (!selectedColor) {
+                showToast('Please select a color.');
+                return; // Prevent adding to wishlist if no color is selected
+            }
+    
+            const wishlistItem = {
+                id: productId,
+                color: selectedColor
+            };
+    
+            addToWishlist(wishlistItem); // Add to wishlist
+        });
+    
+        // Add to wishlist function with AJAX
+        function addToWishlist(wishlistItem) {
+            console.log(wishlistItem,'iiii');
+            
+            $.ajax({
+                url: 'http://localhost:3000/user/addwishlist',
+                type: 'POST',
+                data: JSON.stringify(wishlistItem),
+                contentType: 'application/json',
+                success: function(data) {
+                    console.log('Product added to wishlist:', data);
+                    showToast('Product added to wishlist!');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error adding product to wishlist:', errorThrown);
+                    showToast('Failed to add product to wishlist.');
+                }
+            });
+        }
     </script>
+    
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const colorButtons = document.querySelectorAll('.color-btn');
+        const imageSlider = document.getElementById('productImageSlider');
+        const thumbnailSlider = document.getElementById('thumbnailSlider');
+        const products = <%- JSON.stringify(products) %>;
+ 
+        // Get the quantity element and add to cart button
+const quantityElement = document.getElementById('colorQuantity');
+const addToCartButton = document.getElementById('addToCartButton');
+
+colorButtons.forEach(button => {
+    button.addEventListener('click', function() {
+        const selectedColor = this.getAttribute('data-color');
+        
+        // Get the quantity for the selected color
+        const colorQuantity = products.colors[selectedColor].quantity;
+        
+        // Update the quantity display
+        quantityElement.textContent = colorQuantity;
+
+        // Disable or enable the add-to-cart button based on stock
+        if (colorQuantity > 0) {
+            addToCartButton.disabled = false;
+            addToCartButton.textContent = "Add to Cart";
+        } else {
+            addToCartButton.disabled = true;
+            addToCartButton.textContent = "Out of Stock";
+        }
+
+        // Clear and add new images as per the selected color
+        imageSlider.innerHTML = '';
+        thumbnailSlider.innerHTML = '';
+
+        products.colors[selectedColor].images.forEach((image, index) => {
+            const figure = document.createElement('figure');
+            figure.classList.add('border-radius-10');
+            const img = document.createElement('img');
+            img.src = `/uploads/${image}`;
+            img.alt = `${selectedColor} product image ${index + 1}`;
+            figure.appendChild(img);
+            imageSlider.appendChild(figure);
+
+            const thumbnailDiv = document.createElement('div');
+            const thumbnailImg = document.createElement('img');
+            thumbnailImg.src = `/uploads/${image}`;
+            thumbnailImg.alt = `product image ${selectedColor} - ${index + 1}`;
+            thumbnailDiv.appendChild(thumbnailImg);
+            thumbnailSlider.appendChild(thumbnailDiv);
+        });
+    });
+});
+
+    });
+ </script>
+ <!-- <script>
+    // Show toast message
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show';
+        setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+    }
+
+    // Set active class for color buttons
+    document.querySelectorAll('.color-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            console.log(`Selected Color: ${this.getAttribute('data-color')}`);
+        });
+    });
+
+    // Handle add to wishlist button click
+    document.getElementById('addToWishlistButton').addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+
+        // Get selected color
+        const selectedColorElement = document.querySelector('.color-btn.active');
+        const selectedColor = selectedColorElement ? selectedColorElement.getAttribute('data-color') : null;
+
+        console.log(selectedColor, 'eee');
+        
+        // Check if a color is selected
+        if (!selectedColor) {
+            showToast('Please select a color.');
+            return; // Prevent adding to wishlist if no color is selected
+        }
+
+        const wishlistItem = {
+            id: productId,
+            color: selectedColor
+        };
+
+        console.log(wishlistItem, 'ooo');
+        addToWishlist(wishlistItem); // Add to wishlist with the selected color
+    });
+
+    // Add to wishlist function with AJAX
+    function addToWishlist(wishlistItem) {
+        console.log(wishlistItem,'inside functi');
+        
+        $.ajax({
+            url: '/user/addwishlist',
+            type: 'POST',
+            data: JSON.stringify(wishlistItem),
+            contentType: 'application/json',
+            success: function(data) {
+                console.log('Product added to wishlist:', data);
+                showToast('Product added to wishlist!');
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error adding product to wishlist:', errorThrown);
+                showToast('Failed to add product to wishlist.');
+            }
+        });
+    }
+</script> -->
+
 </body>
 
 

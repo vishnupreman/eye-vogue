@@ -6,10 +6,29 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs').promises;
 const orderModel= require('../model/order')
-const { log } = require('console')
+const couponModel = require('../model/coupon')
+const cartModel = require('../model/cart')
+const offerModel = require('../model/offer')
+const {applyBestOfferToProduct} = require('../utility/bestoffer')
+const moment = require('moment');
+const ExcelJS = require('exceljs')
+const PDFDocument  = require('pdfkit')
+
 
 const renderHome = async (req, res) => {
-    res.render('dashboard')
+    try {
+        const orders = await orderModel.find()
+        const overallSalesCount = orders.length
+        const overallOrderAmount = orders.reduce((total,order)=>total+order.totalPrice,0)
+        const overallDiscount = orders.reduce((total,order)=>total+(order.discount,0),0)
+        res.render('dashboard',{
+            overallSalesCount,
+            overallOrderAmount:overallOrderAmount.toFixed(2),
+            overallDiscount:overallDiscount.toFixed(2)
+        })
+    } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+    }
 }
 
 const renderProducts = async (req, res) => {
@@ -218,66 +237,45 @@ const listBrands = async (req, res) => {
 
 const addProduct = async (req, res) => {
     const { price, productDescription, productName, product_category, product_brand, colors,
-        product_gender, frame_color, material, frame_style, small, medium, large } = req.body;
+        product_gender, frame_color, material, frame_style, } = req.body;
 
     try {
-        console.log("colors", colors)
+       
         const productNameLower = productName.toLowerCase()
+        
+    
         const existingProduct = await productModel.findOne({ name: productNameLower })
         if (existingProduct) {
-            req.flash('error-message', 'Product with same name already exists')
+            req.flash('error-message', 'Product with the same name already exists')
             return res.redirect('/admin/addproducts')
         }
-        // if (!req.files || req.files.length < 3) {
-        //     req.flash('error_message', 'Add atleast three images')
-        //     return res.redirect('/admin/addproducts')
-        // }
-        // const media = req.files.map(file => file.filename);
 
+      
         const newProduct = new productModel({
             name: productNameLower,
             description: productDescription,
             price: price,
             category: product_category,
             brandname: product_brand,
-            // images: media,
-            // stock: stock,
             gender: product_gender,
             frameColor: frame_color,
             material,
             frameStyle: frame_style,
-            // color:{
-
-            // },
-            size: {
-                s: {
-                    quantity: small
-                },
-                m: {
-                    quantity: medium
-                },
-                l: {
-                    quantity: large
-                },
-            },
             colors: {}
         });
 
+        
         if (colors) {
             for (let color in colors) {
                 const colorData = colors[color];
                 const imagePaths = [];
 
-
-
                 if (req.files[`colors[${color}][images][]`]) {
                     req.files[`colors[${color}][images][]`].forEach(file => {
-                        const imagePath = path.join(file.filename);
+                        const imagePath = path.join(file.filename);  
                         imagePaths.push(imagePath);
                     });
                 }
-                console.log("imagePatharrary", imagePaths)
-
 
                 newProduct.colors[color] = {
                     quantity: colorData.quantity || 0,
@@ -286,18 +284,23 @@ const addProduct = async (req, res) => {
             }
         }
 
+       
+        const savedProduct = await newProduct.save();
 
+      
+        await applyBestOfferToProduct(savedProduct._id);
 
-
-
-
-        await newProduct.save();
+        
         return res.redirect('/admin/products');
+        
     } catch (error) {
         console.log(error);
-        // return res.render('addproducts', { errorMessage: 'An error occurred while adding the product.' });
+        
+        req.flash('error-message', 'An error occurred while adding the product.');
+        return res.redirect('/admin/addproducts');
     }
 };
+
 
 const unpublishProduct = async (req, res) => {
     const productId = req.params.productId
@@ -356,14 +359,13 @@ const editproduct = async (req, res) => {
         blackQuantity,
         redQuantity,
         greenQuantity,
-        small,
-        medium,
-        large,
         existingImages
     } = req.body;
 
-    console.log(req.files);
-    console.log(req.body);
+
+    console.log(req.body,'body');
+    console.log(product_category,'cataa',product_brand);
+    
     try {
         const productNameLower = productName.toLowerCase();
 
@@ -374,10 +376,8 @@ const editproduct = async (req, res) => {
         }
 
 
-        const product = await productModel.findById(id);
+        const product = await productModel.findById(id)
         const updatedColors = { ...product.colors };
-
-        // console.log({ ...product.colors },'hiiiiiiiiiiiiiiiiiii');
         
 
         ['red', 'black', 'green', 'yellow'].forEach(color => {
@@ -386,24 +386,17 @@ const editproduct = async (req, res) => {
             if (colorQuantity) {
                 updatedColors[color].quantity = colorQuantity;
 
-
-                // console.log(updatedColors[color].quantity,'secodndddd');
-                
             }
 
             updatedColors[color].images = existingImages && existingImages[color]
                 ? existingImages[color]
                 : [];
-
-            // console.log(updatedColors[color].images,'thirdddd');
             
 
             if (req.files && req.files[`colors[${color}][images][]`]) {
                 const newImages = req.files[`colors[${color}][images][]`].map(file => file.filename);
                 updatedColors[color].images = [...updatedColors[color].images, ...newImages]; 
-                
-                // console.log(newImages,'fourthhhhh');
-                // console.log(updatedColors[color].images,'fifthhhhhh');
+            
                 
             }
         });
@@ -419,14 +412,10 @@ const editproduct = async (req, res) => {
             material,
             frameStyle: frame_style,
             colors: updatedColors,
-            size: {
-                s: { quantity: small },
-                m: { quantity: medium },
-                l: { quantity: large }
-            }
         }, { new: true });
 
         await updatedProduct.save();
+        await applyBestOfferToProduct(id)
         req.flash('success-message', 'Product updated successfully');
         return res.redirect('/admin/products');
 
@@ -534,6 +523,432 @@ const renderOrderDetailPage = async(req,res)=>{
     }
 }
 
+const updateItemStatus = async(req,res)=>{
+
+    const{ orderId, itemId, status } = req.body
+    try {
+        const validStatuses = ["Pending", "Shipped", "Delivered", "Cancelled"];
+        if(!validStatuses.includes(status)){
+            return res.status(400).json({ success: false, message: "Invalid status value" });
+        }
+        const order = await orderModel.findById(orderId)
+        if(!order){
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        const item = order.items.id(itemId)
+        if(!item){
+            return res.status(404).json({ success: false, message: "Order item not found" });
+        }
+        item.status = status
+        await order.save()
+        res.status(200).json({ success: true, message: "Item status updated successfully" });
+    } catch (error) {
+        console.error("Error updating item status:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+
+const renderCouponPage = async(req,res)=>{
+    try {
+        const coupons = await couponModel.find()
+        res.render('coupon',{coupons})
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const renderAddCouponPage = async(req,res)=>{
+    res.render('addcoupon')
+}
+
+const createCoupon = async(req,res)=>{
+    const { code, discountType, discountValue, minOrderValue, maxDiscountValue, expiresAt, isActive } = req.body;
+    const userId = req.userId
+    try {
+        const coupons = new couponModel({
+            code,
+            discountType,
+            discountValue,
+            expiresAt,
+            isActive,
+            minOrderValue,
+            maxDiscountValue,
+        })
+        await coupons.save()
+        return res.status(200).json({success:true})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({success:false,message:'Internal server error when adding coupon'})
+    }
+}
+
+const deactivateCoupon = async(req,res)=>{
+    const id = req.params.id
+    try {
+        const coupon = await couponModel.findById(id)
+        if(!coupon){
+            return res.status(404).json({success:false,message:'No coupon found'})
+        }
+        coupon.isActive=false
+        await coupon.save()
+        return res.status(200).json({success:true,message:'Deactivated',coupon})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({success:false,message:'Server error when deactivating coupon'})
+    }
+}
+
+const deleteCoupon = async(req,res)=>{
+    const id = req.params.id
+    try {
+        const coupon = await couponModel.findByIdAndDelete(id)
+        if(!coupon){
+            return res.status(404).json({success:false,message:'No coupon found'})
+        }
+        return res.status(200).json({success:true,message:'Coupon deleted',coupon})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({success:false,message:'Server error when delete coupon'})
+    }
+}
+
+const renderOfferPage = async(req,res)=>{
+    try {
+        const offers = await offerModel.find()
+        res.render('offers',{offers})
+    } catch (error) {
+        console.log(error);
+        
+    }
+}
+
+const renderAddOffers = async(req,res)=>{
+    try {
+        const products = await productModel.find()
+        const categories  = await categoryModel.find()
+        res.render('addoffers',{products, categories })
+    } catch (error) {
+        console.error('Error fetching products and categories:', err);
+        res.status(500).send('Server Error');
+    }
+}
+
+const createOffers = async (req, res) => {
+    const { offerName, offerType, discountType, discountValue, startDate, endDate, applicableProducts, applicableCategories } = req.body;
+
+    try {
+        
+        const isListed = req.body.isListed === 'on';
+
+        const newOffer = new offerModel({
+            offerName,
+            offerType,
+            discountType,
+            discountValue,
+            startDate,
+            endDate,
+            applicableProducts: offerType === 'product' ? applicableProducts : [],
+            applicableCategories: offerType === 'category' ? applicableCategories : [],
+            isListed,
+        });
+
+       
+        await newOffer.save();
+
+      
+        if (isListed) {
+          
+            if (offerType === 'product' && applicableProducts && applicableProducts.length > 0) {
+                const products = await productModel.find({ _id: { $in: applicableProducts } });
+                for (let product of products) {
+                    await applyBestOfferToProduct(product._id);  
+                }
+            }
+
+            
+            if (offerType === 'category' && applicableCategories && applicableCategories.length > 0) {
+                const products = await productModel.find({
+                    category: { $in: applicableCategories },
+                });
+                for (let product of products) {
+                    await applyBestOfferToProduct(product._id);  
+                }
+            }
+        }
+
+        
+        return res.redirect('/admin/offers');
+    } catch (error) {
+        console.error('Error creating offer:', error);
+        res.status(500).send('An error occurred while creating the offer.');
+    }
+};
+
+
+const offerListUnlist = async (req, res) => {
+    const offerId = req.params.id;
+
+    try {
+        
+        const offer = await offerModel.findById(offerId);
+        if (!offer) {
+            return res.status(404).send("Offer not found");
+        }
+
+       
+        offer.isListed = !offer.isListed;
+
+        
+        await offer.save();
+
+        
+        if (offer.isListed) {
+            if (offer.offerType === 'product' && offer.applicableProducts && offer.applicableProducts.length > 0) {
+                const products = await productModel.find({ _id: { $in: offer.applicableProducts } });
+                for (let product of products) {
+                    await applyBestOfferToProduct(product._id);  
+                }
+            }
+
+            if (offer.offerType === 'category' && offer.applicableCategories && offer.applicableCategories.length > 0) {
+                const products = await productModel.find({ category: { $in: offer.applicableCategories } });
+                for (let product of products) {
+                    await applyBestOfferToProduct(product._id); 
+                }
+            }
+        } else {
+            
+            if (offer.offerType === 'product' && offer.applicableProducts && offer.applicableProducts.length > 0) {
+                const products = await productModel.find({ _id: { $in: offer.applicableProducts } });
+                for (let product of products) {
+                    product.bestOffer = null;
+                    product.discountedPrice = null;  
+                    await product.save(); 
+                }
+            }
+
+            if (offer.offerType === 'category' && offer.applicableCategories && offer.applicableCategories.length > 0) {
+                const products = await productModel.find({ category: { $in: offer.applicableCategories } });
+                for (let product of products) {
+                    product.bestOffer = null;
+                    product.discountedPrice = null;  
+                    await product.save();  
+                }
+            }
+        }
+
+        
+        res.redirect('/admin/offers');
+    } catch (error) {
+        console.error("Error toggling offer listing:", error);
+        res.status(500).send("Server Error");
+    }
+};
+
+
+const deleteOffer = async (req, res) => {
+    const id = req.params.id;
+    try {
+       
+        const offer = await offerModel.findByIdAndDelete(id);
+        if (!offer) {
+            req.flash("error-message", "Offer not found.");
+            return res.redirect("/admin/offers");
+        }
+
+        
+        const products = await productModel.find({
+            $or: [
+                { bestOffer: id }, 
+                { category: { $in: offer.applicableCategories } }, 
+                { _id: { $in: offer.applicableProducts } } 
+            ]
+        });
+
+        
+        for (const product of products) {
+            await applyBestOfferToProduct(product._id); 
+        }
+
+       
+        req.flash("success-message", "Offer deleted and products updated successfully.");
+        return res.redirect("/admin/offers");
+    } catch (error) {
+       
+        console.error("Error deleting offer:", error);
+        req.flash("error-message", "Failed to delete offer. Please try again.");
+        return res.redirect("/admin/offers");
+    }
+};
+
+const renderSalesReportPage = async (req, res) => {
+    try {
+        const { startDate, endDate, timeFilter, page = 1 } = req.query;
+        let filter = {};
+
+        if (startDate && endDate) {
+            filter.createdAt = {
+                $gte: moment(startDate).startOf('day').toDate(),
+                $lte: moment(endDate).endOf('day').toDate(),
+            };
+        }
+
+        if (timeFilter) {
+            const now = moment();
+            switch (timeFilter) {
+                case 'day':
+                    filter.createdAt = { $gte: now.startOf('day').toDate() };
+                    break;
+                case 'week':
+                    filter.createdAt = { $gte: now.startOf('week').toDate() };
+                    break;
+                case 'month':
+                    filter.createdAt = { $gte: now.startOf('month').toDate() };
+                    break;
+            }
+        }
+
+        const orders = await orderModel.find(filter)
+            .skip((page - 1) * 10)
+            .limit(10)
+            .sort({ createdAt: -1 });
+
+        const totalOrders = await orderModel.countDocuments(filter);
+        const totalPages = Math.ceil(totalOrders / 10);
+        const pagination = {
+            currentPage: page,
+            totalPages: totalPages,
+            hasPreviousPage: page > 1,
+            hasNextPage: page < totalPages,
+            previousPage: page - 1,
+            nextPage: page + 1
+        };
+
+        res.render('salesreport', {
+            orders,
+            pagination,
+            startDate,
+            endDate,
+            timeFilter
+        });
+    } catch (error) {
+        console.error('Error rendering sales report page:', error);
+    }
+};
+
+const downloadExcelSalesReport = async (req, res) => {
+    try {
+        const { startDate, endDate, timeFilter } = req.body;
+        let filter = {};
+
+        if (startDate && endDate) {
+            filter.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+
+        if (timeFilter) {
+            const now = moment();
+            switch (timeFilter) {
+                case 'day':
+                    filter.createdAt = { $gte: now.startOf('day').toDate() };
+                    break;
+                case 'week':
+                    filter.createdAt = { $gte: now.startOf('week').toDate() };
+                    break;
+                case 'month':
+                    filter.createdAt = { $gte: now.startOf('month').toDate() };
+                    break;
+            }
+        }
+
+        const orders = await orderModel.find(filter);
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
+
+        worksheet.columns = [
+            { header: 'Order ID', key: 'orderID', width: 20 },
+            { header: 'Date', key: 'date', width: 15 },
+            { header: 'Discount', key: 'discount', width: 15 },
+            { header: 'Amount', key: 'amount', width: 15 },
+            { header: 'Payment Method', key: 'paymentMethod', width: 20 }
+        ];
+
+        orders.forEach(order => {
+            worksheet.addRow({
+                orderID: order._id,
+                date: new Date(order.createdAt).toLocaleDateString(),
+                discount: `Rs.${order.discount.toFixed(2)}`,
+                amount: `Rs.${order.totalPrice.toFixed(2)}`,
+                paymentMethod: order.paymentMethod
+            });
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        res.setHeader('Content-Disposition', 'attachment; filename=salesreport.xlsx');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buffer);
+    } catch (error) {
+        console.error('Error downloading Excel sales report:', error);
+   
+    }
+};
+
+const downloadPdfSalesReport = async (req, res) => {
+    try {
+        const { startDate, endDate, timeFilter } = req.query;
+        let filter = {};
+
+        if (startDate && endDate) {
+            filter.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+
+        if (timeFilter) {
+            const now = moment();
+            switch (timeFilter) {
+                case 'day':
+                    filter.createdAt = { $gte: now.startOf('day').toDate() };
+                    break;
+                case 'week':
+                    filter.createdAt = { $gte: now.startOf('week').toDate() };
+                    break;
+                case 'month':
+                    filter.createdAt = { $gte: now.startOf('month').toDate() };
+                    break;
+            }
+        }
+
+        const orders = await orderModel.find(filter);
+        const doc = new PDFDocument();
+
+        doc.fontSize(16).text('Sales Report', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(12).text('Order ID | Date | Discount | Amount | Payment Method');
+        doc.moveDown();
+
+        orders.forEach(order => {
+            const orderDate = new Date(order.createdAt);
+            const formattedDate = orderDate instanceof Date && !isNaN(orderDate) ? orderDate.toLocaleDateString() : 'Invalid Date';
+
+            doc.text(`${order._id}  | ${formattedDate} | Rs.${order.discount.toFixed(2)} | Rs.${order.totalPrice.toFixed(2)} | ${order.paymentMethod}`);
+            doc.moveDown();
+        });
+
+        res.setHeader('Content-Disposition', 'attachment; filename=salesreport.pdf');
+        res.setHeader('Content-Type', 'application/pdf');
+        doc.pipe(res);
+        doc.end();
+    } catch (error) {
+        console.error('Error downloading PDF sales report:', error);
+       
+    }
+}
+
 
 module.exports = {
     renderHome,
@@ -564,5 +979,19 @@ module.exports = {
     editproduct,
     deleteImage,
     cancelOrder,
-    renderOrderDetailPage
+    renderOrderDetailPage,
+    renderCouponPage,
+    renderAddCouponPage,
+    createCoupon,
+    deactivateCoupon,
+    deleteCoupon,
+    renderOfferPage,
+    renderAddOffers,
+    createOffers,
+    offerListUnlist,
+    deleteOffer,
+    updateItemStatus,
+    renderSalesReportPage,
+    downloadExcelSalesReport,
+    downloadPdfSalesReport
 }

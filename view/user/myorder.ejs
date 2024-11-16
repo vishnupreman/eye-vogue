@@ -17,6 +17,17 @@
     <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg">
     <!-- Template CSS -->
     <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        #notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    padding: 1em;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+    </style>
 </head>
 
 <body>
@@ -453,9 +464,7 @@
                                         <li class="nav-item">
                                             <a class="nav-link active" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
                                         </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
-                                        </li>
+                                        
                                         <li class="nav-item">
                                             <a class="nav-link" id="address-tab"  href="/user/address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
                                         </li>
@@ -463,7 +472,7 @@
                                             <a class="nav-link" id="account-detail-tab"  href="/user/myaccount" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" href="page-login-register.html"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                            <a class="nav-link" href="/user/wallet"><i class="fi-rs-sign-out mr-10"></i>Wallet</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -478,93 +487,96 @@
                                             </div>
                                             <div class="card-body">
                                                 <div class="table-responsive">
-                                                    <table class="table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Product Name</th>
-                                                                <th>Product Image</th>
-                                                                <th>Status</th>
-                                                                <th>Total Price</th>
-                                                                <th>Date</th>
-                                                                <th>Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <% orders.forEach(order => { %>
-                                                                <% order.items.forEach(item => { %> <!-- Loop through each item in the order -->
-                                                                <tr>
-                                                                    <!-- Product name -->
-                                                                    <td><%= item.product.name %></td>
-                                                    
-                                                                    <!-- Product image -->
-                                                                    <td>
-                                                                        <img src="/uploads/<%= item.product.colors[item.color].images[2] %>" alt="<%= item.product.name %>" style="width: 50px; height: auto;">
-                                                                    </td>
-                                                                    <%#- console.log(item.product.colors[item.color].images[0]) %>
+                                                  
 
-                                                                    <!-- Status -->
-                                                                    <td><%= order.status %></td>
+                                               <!-- Notification area for success/failure messages -->
+                                                <div id="notification" style="display: none;"></div>
+
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Product Name</th>
+                                                            <th>Product Image</th>
+                                                            <th>Status</th>
+                                                            <th>Price</th>
+                                                            <th>Quantity</th>
+                                                            <th>Date</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% orders.forEach(order => { %>
+                                                            <% order.items.forEach(item => { %>
+                                                                <tr>
+                                                                    <td><%= item.product ? item.product.name : 'Product not found' %></td>
                                                     
-                                                                    <!-- Total price -->
-                                                                    <td>$<%= order.totalPrice.toFixed(2) %></td>
-                                                    
-                                                                    <!-- Date -->
-                                                                    <td><%= order.createdAt.toDateString() %></td>
-                                                    
-                                                                    <!-- View action -->
                                                                     <td>
-                                                                        <button class="btn-small d-block" data-bs-toggle="modal" data-bs-target="#orderModal<%= order._id %>">View</button>
+                                                                        <% if (item.product && item.product.colors && item.product.colors[item.color]) { %>
+                                                                            <img src="/uploads/<%= item.product.colors[item.color].images[0] %>" alt="<%= item.product.name %>" style="width: 50px; height: auto;">
+                                                                        <% } else { %>
+                                                                            <p>Image not available</p>
+                                                                        <% } %>
+                                                                    </td>
+                                                    
+                                                                    <!-- Status with conditional styling -->
+                                                                    <td>
+                                                                        <span style="color: 
+                                                                            <%= item.status === 'Cancelled' || order.status === 'Cancelled' ? 'red' : 
+                                                                                (item.status === 'Delivered' || order.status === 'Delivered' ? 'green' : 'black') %>;">
+                                                                            <%= item.status || order.status %>
+                                                                        </span>
+                                                                    </td>
+                                                    
+                                                                    <td>Rs.<%= item.price.toFixed(2) %></td>
+                                                    
+                                                                    <td><%= item.quantity %></td>
+                                                    
+                                                                    <td><%= order.createdAt ? order.createdAt.toDateString() : 'Date not available' %></td>
+                                                    
+                                                                    <td>
+                                                                        <a href="/user/order/details/<%= order._id %>" class="text-info">View</a>
                                                                     </td>
                                                                 </tr>
-                                                    
-                                                                <!-- Modal for Viewing Order Details -->
-                                                                <div class="modal fade" id="orderModal<%= order._id %>" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
-                                                                    <div class="modal-dialog modal-lg">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <h5 class="modal-title" id="orderModalLabel">Order Details for #<%= order._id %></h5>
-                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                            </div>
-                                                                            <div class="modal-body">
-                                                                                <p><strong>Date:</strong> <%= order.createdAt.toDateString() %></p>
-                                                                                <p><strong>Status:</strong> <%= order.status %></p>
-                                                                                <p><strong>Total Price:</strong> Rs.<%= order.totalPrice.toFixed(2) %></p>
-                                                    
-                                                                                <!-- Item Details within the Order -->
-                                                                                <h6>Items:</h6>
-                                                                                <ul>
-                                                                                    <% order.items.forEach(item => { %>
-                                                                                        <li>
-                                                                                            <img src="/uploads/<%= item.product.colors[item.color].images[0] %>" alt="<%= item.product.name %>" style="width: 50px; height: auto;">
-                                                                                            <strong>Product:</strong> <%= item.product.name %> <br>
-                                                                                            <strong>Color:</strong> <%= item.color %> <br>
-                                                                                            <strong>Size:</strong> <%= item.size %> <br>
-                                                                                            <strong>Quantity:</strong> <%= item.quantity %> <br>
-                                                                                            <strong>Price:</strong> Rs.<%= item.price.toFixed(2) %>
-                                                                                        </li>
-                                                                                    <% }) %>
-                                                                                </ul>
-                                                                            </div>
-                                                                            <div class="modal-footer">
-                                                                                <% if(order.status === 'Pending' || order.status === 'Confirmed') { %>
-                                                                                    <button type="button" class="btn btn-danger" onclick="showConfirmationModal('/user/ordercancel/<%= order._id %>', 'Are you sure you want to cancel this order?')">Cancel Order</button>
-                                                                                <% } %>
-                                                                            
-                                                                                <% if(order.status === 'Delivered') { %>
-                                                                                    <button type="button" class="btn btn-warning" onclick="showConfirmationModal('/user/orderreturn/<%= order._id %>', 'Are you sure you want to return this order?')">Return Order</button>
-                                                                                <% } %>
-                                                                            
-                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                            </div>
-                                                                            
-                                                                            
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <% }) %>
                                                             <% }) %>
-                                                        </tbody>
-                                                    </table>
+                                                            <!-- Row for displaying total price of each order -->
+                                                            <tr>
+                                                                <td colspan="5" style="text-align: right;"><strong>Total Price:</strong></td>
+                                                                <td colspan="2">Rs.<%= order.totalPrice.toFixed(2) %></td>
+                                                            </tr>
+                                                        <% }) %>
+                                                    </tbody>
+                                                </table>
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+
+                                                <!-- Modal for item details and confirmation -->
+                                                <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="itemModalLabel">Item Details</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p><strong>Product Name:</strong> <span id="modalProductName"></span></p>
+                                                                <p><strong>Status:</strong> <span id="modalItemStatus"></span></p>
+                                                                <p><strong>Total Price:</strong> <span id="modalTotalPrice"></span></p>
+                                                                <p>Are you sure you want to <span id="actionText"></span> this item?</p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                <button type="button" id="confirmActionButton" class="btn btn-danger" onclick="confirmItemAction()">Confirm</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                    
+                                                    
                                                     
                                                 </div>
                                             </div>
@@ -828,7 +840,8 @@
 
     <!-- Bootstrap JavaScript Bundle (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="path/to/jquery.elevateZoom.min.js"></script>
     <script src="assets/js/vendor/modernizr-3.6.0.min.js"></script>
     <script src="assets/js/vendor/jquery-3.6.0.min.js"></script>
     <script src="assets/js/vendor/jquery-migrate-3.3.0.min.js"></script>
@@ -851,46 +864,79 @@
     <!-- Template  JS -->
     <script src="assets/js/main.js"></script>
     <script>
-        
-        function showConfirmationModal(actionUrl, message) {
-    // Set the confirmation message dynamically
-    document.getElementById('confirmationMessage').innerText = message;
-
-    // Set the action when "Yes, Proceed" is clicked
-    document.getElementById('confirmActionButton').onclick = function() {
-        // Use fetch for the POST request to handle server response
-        fetch(actionUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Check for a redirect URL in the response
-            if (data.redirectUrl) {
-                // Store the message in sessionStorage for display on the redirect page
-                sessionStorage.setItem('orderMessage', data.message);
-
-                // Redirect to the specified URL
-                window.location.href = data.redirectUrl;
-            } else {
-                // If no redirect, just alert the message
-                alert(data.message || 'Something went wrong. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while processing your request.');
-        });
-    };
-
-    // Show the modal
-    const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-    confirmationModal.show();
-}
-
+        let actionUrl = '';
+    
+        function openItemModal(orderId, itemId, actionType) {
+            // Determine the action URL and text based on the action type
+            actionUrl = `/user/${actionType}Item/${orderId}/${itemId}`;
+            console.log(actionUrl,'aaaaa');
+            
+            document.getElementById('actionText').textContent = actionType === 'cancel' ? 'cancel' : 'return';
+            
+            // Retrieve item details from the table row
+            const row = document.querySelector(`[onclick="openItemModal('${orderId}', '${itemId}', '${actionType}')"]`).closest('tr');
+            const productName = row.querySelector('td:nth-child(1)').textContent;
+            const itemStatus = row.querySelector('td:nth-child(3)').textContent;
+            const totalPrice = row.querySelector('td:nth-child(4)').textContent;
+    
+            // Display item details in the modal
+            document.getElementById('modalProductName').textContent = productName;
+            document.getElementById('modalItemStatus').textContent = itemStatus;
+            document.getElementById('modalTotalPrice').textContent = totalPrice;
+    
+            // Show the modal
+            const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
+            itemModal.show();
+        }
+    
+        function confirmItemAction() {
+            // Send the fetch request to cancel or return the item
+            fetch(actionUrl, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hide the corresponding action button
+                        const actionButton = document.querySelector(`[onclick="openItemModal('${data.orderId}', '${data.itemId}', '${data.actionType}')"]`);
+                        if (actionButton) {
+                            actionButton.style.display = 'none';
+                        }
+    
+                        // Update status text in the table
+                        const statusCell = actionButton.closest('tr').querySelector('td:nth-child(3)');
+                        statusCell.textContent = data.actionType === 'cancel' ? 'Canceled' : 'Returned';
+    
+                        // Display a notification
+                        displayNotification(data.message, true);
+                    } else {
+                        displayNotification(data.message, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayNotification('An error occurred while processing the request.', false);
+                });
+    
+            // Close the modal after confirming action
+            const itemModal = bootstrap.Modal.getInstance(document.getElementById('itemModal'));
+            itemModal.hide();
+        }
+    
+        // Function to display notifications
+        function displayNotification(message, isSuccess) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.className = `alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
+            notification.style.display = 'block';
+    
+            // Hide the notification after a few seconds
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
     </script>
+    
+    
+    
     
 
     

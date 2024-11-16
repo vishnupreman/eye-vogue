@@ -50,6 +50,17 @@
     accent-color: #28a745; /* Changes tick color */
 }
 
+
+/* Reduce the size of checkboxes */
+.category-filter {
+    width: 16px; /* Adjust width */
+    height: 16px; /* Adjust height */
+    transform: scale(0.8); /* Reduce size proportionally */
+    -webkit-transform: scale(0.8); /* Ensure compatibility on webkit browsers */
+    -moz-transform: scale(0.8); /* Ensure compatibility on Firefox */
+    margin-right: 5px; /* Add some space between checkbox and label text */
+}
+
     </style>
 </head>
 
@@ -235,36 +246,25 @@
                     <div class="header-right">
                         <div class="search-style-2">
                             <form action="#">
-                                <select class="select-active">
-                                    <option>All Categories</option>
-                                    <option>Women's</option>
-                                    <option>Men's</option>
-                                    <option>Cellphones</option>
-                                    <option>Computer</option>
-                                    <option>Electronics</option>
-                                    <option> Accessories</option>
-                                    <option>Home & Garden</option>
-                                    <option>Luggage</option>
-                                    <option>Shoes</option>
-                                    <option>Mother & Kids</option>
-                                </select>
-                                <input type="text" placeholder="Search for items...">
+                                
+                                <input type="text" id="search-input" placeholder="Search for items...">
+
                             </form>
                         </div>
                         <div class="header-action-right">
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
-                                    <a href="shop-wishlist.html">
+                                    <a href="/user/wishlist">
                                         <img class="svgInject" alt="Evara" src="assets/imgs/theme/icons/icon-heart.svg">
                                         <span class="pro-count blue">4</span>
                                     </a>
                                 </div>
                                 <div class="header-action-icon-2">
-                                    <a class="mini-cart-icon" href="shop-cart.html">
+                                    <a class="mini-cart-icon" href="/user/cart">
                                         <img alt="Evara" src="assets/imgs/theme/icons/icon-cart.svg">
                                         <span class="pro-count blue">2</span>
                                     </a>
-                                    <div class="cart-dropdown-wrap cart-dropdown-hm2">
+                                    <!-- <div class="cart-dropdown-wrap cart-dropdown-hm2">
                                         <ul>
                                             <li>
                                                 <div class="shopping-cart-img">
@@ -300,7 +300,7 @@
                                                 <a href="shop-checkout.html">Checkout</a>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -499,121 +499,20 @@
                         <div class="main-menu main-menu-padding-1 main-menu-lh-2 d-none d-lg-block">
                             <nav>
                                 <ul>
-                                    <li><a class="active" href="/user/home">Home <i class="fi-rs-angle-down"></i></a>
-                                        <!-- <ul class="sub-menu">
-                                            <li><a href="index.html">Home 1</a></li>
-                                            <li><a href="index-2.html">Home 2</a></li>
-                                            <li><a href="index-3.html">Home 3</a></li>
-                                            <li><a href="index-4.html">Home 4</a></li>
-                                        </ul> -->
+                                    <li><a class="active" href="index.html">Home <i class="fi-rs-angle-down"></i></a>
+                                        
                                     </li>
-                                    <li>
-                                        <a href="page-about.html">About</a>
+                                    
+                                    <li><a href="/user/shop">Shop</a>
+                                        
+                                
                                     </li>
-                                    <li><a href="shop-grid-right.html">Shop <i class="fi-rs-angle-down"></i></a>
-                                        <!-- <ul class="sub-menu">
-                                            <li><a href="shop-grid-right.html">Shop Grid – Right Sidebar</a></li>
-                                            <li><a href="shop-grid-left.html">Shop Grid – Left Sidebar</a></li>
-                                            <li><a href="shop-list-right.html">Shop List – Right Sidebar</a></li>
-                                            <li><a href="shop-list-left.html">Shop List – Left Sidebar</a></li>
-                                            <li><a href="shop-fullwidth.html">Shop - Wide</a></li>
-                                            <li><a href="#">Single Product <i class="fi-rs-angle-right"></i></a>
-                                                <ul class="level-menu">
-                                                    <li><a href="shop-product-right.html">Product – Right Sidebar</a></li>
-                                                    <li><a href="shop-product-left.html">Product – Left Sidebar</a></li>
-                                                    <li><a href="shop-product-full.html">Product – No sidebar</a></li>
-                                                </ul>
-                                            </li>
-                                            <li><a href="shop-filter.html">Shop – Filter</a></li>
-                                            <li><a href="shop-wishlist.html">Shop – Wishlist</a></li>
-                                            <li><a href="shop-cart.html">Shop – Cart</a></li>
-                                            <li><a href="shop-checkout.html">Shop – Checkout</a></li>
-                                            <li><a href="shop-compare.html">Shop – Compare</a></li>
-                                        </ul> -->
+                                    <li class="position-static"><a href="/user/myaccount">My Profile</a>
+                                        
                                     </li>
-                                    <!-- <li class="position-static"><a href="#">Mega menu <i class="fi-rs-angle-down"></i></a>
-                                        <ul class="mega-menu">
-                                            <li class="sub-mega-menu sub-mega-menu-width-22">
-                                                <a class="menu-title" href="#">Women's Fashion</a>
-                                                <ul>
-                                                    <li><a href="shop-product-right.html">Dresses</a></li>
-                                                    <li><a href="shop-product-right.html">Blouses & Shirts</a></li>
-                                                    <li><a href="shop-product-right.html">Hoodies & Sweatshirts</a></li>
-                                                    <li><a href="shop-product-right.html">Wedding Dresses</a></li>
-                                                    <li><a href="shop-product-right.html">Prom Dresses</a></li>
-                                                    <li><a href="shop-product-right.html">Cosplay Costumes</a></li>
-                                                </ul>
-                                            </li>
-                                            <li class="sub-mega-menu sub-mega-menu-width-22">
-                                                <a class="menu-title" href="#">Men's Fashion</a>
-                                                <ul>
-                                                    <li><a href="shop-product-right.html">Jackets</a></li>
-                                                    <li><a href="shop-product-right.html">Casual Faux Leather</a></li>
-                                                    <li><a href="shop-product-right.html">Genuine Leather</a></li>
-                                                    <li><a href="shop-product-right.html">Casual Pants</a></li>
-                                                    <li><a href="shop-product-right.html">Sweatpants</a></li>
-                                                    <li><a href="shop-product-right.html">Harem Pants</a></li>
-                                                </ul>
-                                            </li>
-                                            <li class="sub-mega-menu sub-mega-menu-width-22">
-                                                <a class="menu-title" href="#">Technology</a>
-                                                <ul>
-                                                    <li><a href="shop-product-right.html">Gaming Laptops</a></li>
-                                                    <li><a href="shop-product-right.html">Ultraslim Laptops</a></li>
-                                                    <li><a href="shop-product-right.html">Tablets</a></li>
-                                                    <li><a href="shop-product-right.html">Laptop Accessories</a></li>
-                                                    <li><a href="shop-product-right.html">Tablet Accessories</a></li>
-                                                </ul>
-                                            </li>
-                                            <li class="sub-mega-menu sub-mega-menu-width-34">
-                                                <div class="menu-banner-wrap">
-                                                    <a href="shop-product-right.html"><img src="assets/imgs/banner/menu-banner.jpg" alt="Evara"></a>
-                                                    <div class="menu-banner-content">
-                                                        <h4>Hot deals</h4>
-                                                        <h3>Don't miss<br> Trending</h3>
-                                                        <div class="menu-banner-price">
-                                                            <span class="new-price text-success">Save to 50%</span>
-                                                        </div>
-                                                        <div class="menu-banner-btn">
-                                                            <a href="shop-product-right.html">Shop now</a>
-                                                        </div>
-                                                    </div>
-                                                    <div class="menu-banner-discount">
-                                                        <h3>
-                                                            <span>35%</span>
-                                                            off
-                                                        </h3>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </li> -->
-                                    <li><a href="blog-category-grid.html">Blog <i class="fi-rs-angle-down"></i></a>
-                                        <!-- <ul class="sub-menu">
-                                            <li><a href="blog-category-grid.html">Blog Category Grid</a></li>
-                                            <li><a href="blog-category-list.html">Blog Category List</a></li>
-                                            <li><a href="blog-category-big.html">Blog Category Big</a></li>
-                                            <li><a href="blog-category-fullwidth.html">Blog Category Wide</a></li>
-                                            <li><a href="#">Single Post <i class="fi-rs-angle-right"></i></a>
-                                                <ul class="level-menu level-menu-modify">
-                                                    <li><a href="blog-post-left.html">Left Sidebar</a></li>
-                                                    <li><a href="blog-post-right.html">Right Sidebar</a></li>
-                                                    <li><a href="blog-post-fullwidth.html">No Sidebar</a></li>
-                                                </ul>
-                                            </li>
-                                        </ul> -->
-                                    </li>
+                                    
                                     <li><a href="#">Pages <i class="fi-rs-angle-down"></i></a>
-                                        <!-- <ul class="sub-menu">
-                                            <li><a href="page-about.html">About Us</a></li>
-                                            <li><a href="page-contact.html">Contact</a></li>
-                                            <li><a href="page-account.html">My Account</a></li>
-                                            <li><a href="page-login-register.html">login/register</a></li>
-                                            <li><a href="page-purchase-guide.html">Purchase Guide</a></li>
-                                            <li><a href="page-privacy-policy.html">Privacy Policy</a></li>
-                                            <li><a href="page-terms.html">Terms of Service</a></li>
-                                            <li><a href="page-404.html">404 Page</a></li>
-                                        </ul> -->
+                                        
                                     </li>
                                     <li>
                                         <a href="page-contact.html">Contact</a>
@@ -864,9 +763,9 @@
                 <div class="row flex-row-reverse">
                     <div class="col-lg-9">
                         <div class="shop-product-fillter">
-                            <div class="totall-product">
+                            <!-- <div class="totall-product">
                                 <p> We found <strong class="text-brand">688</strong> items for you!</p>
-                            </div>
+                            </div> -->
                             <div class="sort-by-product-area">
                                 <div class="sort-by-cover mr-10">
                                     <div class="sort-by-product-wrap">
@@ -893,19 +792,20 @@
                                             <span><i class="fi-rs-apps-sort"></i>Sort by:</span>
                                         </div>
                                         <div class="sort-by-dropdown-wrap">
-                                            <span> Featured <i class="fi-rs-angle-small-down"></i></span>
+                                            <span id="selected-sort">Featured <i class="fi-rs-angle-small-down"></i></span>
                                         </div>
                                     </div>
                                     <div class="sort-by-dropdown">
                                         <ul>
-                                            <li><a class="active" href="#">Featured</a></li>
-                                            <li><a href="#">Price: Low to High</a></li>
-                                            <li><a href="#">Price: High to Low</a></li>
-                                            <li><a href="#">Release Date</a></li>
-                                            <li><a href="#">Avg. Rating</a></li>
+                                            <li><a href="#" class="sort-option active" data-sort="featured">Featured</a></li>
+                                            <li><a href="#" class="sort-option" data-sort="priceLowHigh">Price: Low to High</a></li>
+                                            <li><a href="#" class="sort-option" data-sort="priceHighLow">Price: High to Low</a></li>
+                                            <li><a href="#" class="sort-option" data-sort="nameAsc">A - Z</a></li>
+                                            <li><a href="#" class="sort-option" data-sort="nameDesc">Z - A</a></li>
                                         </ul>
                                     </div>
                                 </div>
+                                
                             </div>
                         </div>
                         <div class="row product-grid-4">
@@ -944,9 +844,14 @@
                                             </span>
                                         </div>
                                         <div class="product-price">
-                                            <span>Rs:<%= element.price %> </span>
-                                            <!-- <span class="old-price">$245.8</span> -->
+                                            <% if (element.discountedPrice) { %>
+                                                <span class="discounted-price">Rs: <%= element.discountedPrice %></span>
+                                                <span class="original-price text-muted" style="text-decoration: line-through;">Rs: <%= element.price %></span>
+                                            <% } else { %>
+                                                <span>Rs: <%= element.price %> </span>
+                                            <% } %>
                                         </div>
+                                        
                                         
                                         <div class="product-action-1 show">
                                             <% if (element.stock===0){%>
@@ -966,18 +871,22 @@
                             <% }); %>
                         </div>
                         <!--pagination-->
-                        <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination justify-content-start">
-                                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">02</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">03</a></li>
-                                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">16</a></li>
-                                    <li class="page-item"><a class="page-link" href="#"><i class="fi-rs-angle-double-small-right"></i></a></li>
-                                </ul>
-                            </nav>
-                        </div>
+                        <% if (products.length > 0 && totalPages > 1) { %>
+                            <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-start">
+                                        <% for (let i = 1; i <= totalPages; i++) { %>
+                                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                <a class="page-link" href="?page=<%= i %>&limit=12"><%= i %></a>
+                                            </li>
+                                        <% } %>
+                                    </ul>
+                                </nav>
+                            </div>
+                        <% } %>
+                        
+                        
+                        
                     </div>
                     <div class="col-lg-3 primary-sidebar sticky-sidebar">
                         <div class="widget-category mb-30">
@@ -985,11 +894,15 @@
                             <ul class="categories">
                                 <% category.forEach(cat => { %>
                                     <li>
-                                        <a href="/user/shopfilter?category=<%= cat._id %>" class="category-filter" data-category="<%= cat._id %>"><%= cat.name %></a>
+                                        <label>
+                                            <input type="checkbox" class="category-filter" data-category="<%= cat._id %>">
+                                            <%= cat.name %>
+                                        </label>
                                     </li>
                                 <% }) %>
                             </ul>
                         </div>
+                        
                         
                         <!-- Fillter By Price -->
                         <div class="sidebar-widget price_range range mb-30">
@@ -1049,13 +962,13 @@ products.forEach(product => {
 
 
                                     
-                                    <label class="fw-900 mt-15">Size</label>
+                                    <!-- <label class="fw-900 mt-15">Size</label>
                                     <div class="custome-checkbox">
-                                        <% ['s', 'm', 'l'].forEach((size, index) => { %>
-                                            <input class="form-check-input size-filter" type="checkbox" id="sizeCheckbox<%= index %>" value="<%= size %>" >
-                                            <label class="form-check-label" for="sizeCheckbox<%= index %>"><span><%= size.toUpperCase() %></span></label><br>
-                                        <% }) %>
-                                    </div>
+                                        <%# ['s', 'm', 'l'].forEach((size, index) => { %>
+                                            <input class="form-check-input size-filter" type="checkbox" id="sizeCheckbox<%#= index %>" value="<%#= size %>" >
+                                            <label class="form-check-label" for="sizeCheckbox<%#= index %>"><span><%#= size.toUpperCase() %></span></label><br>
+                                        <%# }) %>
+                                    </div> -->
 
 
                                 </div>
@@ -1221,20 +1134,15 @@ products.forEach(product => {
     <script src="assets/js/main.js"></script>
     <script src="assets/js/shop.js"></script>
     
-    <script>
+    <!-- <script>
 
-        const cf=(product,e)=>{
-            e.preventDefault()
-            console.log(product);
-            
-        }
         $(document).ready(function () {
-    // Initialize the price slider with min and max values
+    
     $("#slider-range").slider({
         range: true,
         min: 0,
-        max: 5000, // Adjust max range based on your product price range
-        values: [0, 500],
+        max: 50000, // Adjust max range based on your product price range
+        values: [0, 5000],
         slide: function (event, ui) {
             $("#amount").val("Rs" + ui.values[0] + " - Rs" + ui.values[1]);
             $("#min_price").val(ui.values[0]);
@@ -1251,50 +1159,64 @@ products.forEach(product => {
     $("#min_price").val($("#slider-range").slider("values", 0));
     $("#max_price").val($("#slider-range").slider("values", 1));
 
+    // Initialize selectedSort variable
+    let selectedSort = 'featured';
+
     // Filter click event
     $('.category-filter, .color-filter, .size-filter').on('click', function (e) {
         e.preventDefault();
         applyFilters();
     });
 
+    // Sorting click event
+    $('.sort-option').on('click', function (e) {
+        e.preventDefault();
+        selectedSort = $(this).data('sort');
+        $('#selected-sort').text($(this).text());
+
+        // Mark the clicked option as active
+        $('.sort-option').removeClass('active');
+        $(this).addClass('active');
+
+        // Trigger filter after sorting option is selected
+        applyFilters();
+    });
+
     // Function to apply filters and make AJAX request
     function applyFilters() {
-        // Collect selected filters
-        const selectedCategory = $('.category-filter:checked').data('category') || null;
-        const selectedColor = $('.color-filter:checked').map(function () { return $(this).val(); }).get();
-        const selectedSize = $('.size-filter:checked').map(function () { return $(this).val(); }).get();
-        const minPrice = $("#min_price").val();
-        const maxPrice = $("#max_price").val();
+    const selectedCategory = $('.category-filter.active').data('category') || null;
+    const selectedColor = $('.color-filter:checked').map(function () { return $(this).val(); }).get();
+    const selectedSize = $('.size-filter:checked').map(function () { return $(this).val(); }).get();
+    const minPrice = $("#min_price").val();
+    const maxPrice = $("#max_price").val();
 
-        // Build the query string for filters
-        const queryParams = new URLSearchParams();
-        if (selectedCategory) queryParams.append('category', selectedCategory);
-        if (selectedColor.length) queryParams.append('color', selectedColor);
-        if (selectedSize.length) queryParams.append('sizes', selectedSize);
-        if (minPrice && maxPrice) {
-            queryParams.append('min_price', minPrice);
-            queryParams.append('max_price', maxPrice);
-        }
-
-        // AJAX request to filter route with price range included
-        $.ajax({
-            url: `/user/shopfilter?${queryParams.toString()}`,
-            method: 'GET',
-            success: function (response) {
-                // Render the filtered products
-                renderProducts(response.products);
-            },
-            error: function (error) {
-                console.error("Error fetching filtered products:", error);
-            }
-        });
+    const queryParams = new URLSearchParams();
+    if (selectedCategory) queryParams.append('category', selectedCategory);
+    if (selectedColor.length) queryParams.append('color', selectedColor.join(',')); // For multiple colors
+    if (selectedSize.length) queryParams.append('sizes', selectedSize.join(','));  // For multiple sizes
+    if (minPrice && maxPrice) {
+        queryParams.append('min_price', minPrice);
+        queryParams.append('max_price', maxPrice);
     }
-});
+    if (selectedSort) queryParams.append('sort', selectedSort);
 
+    $.ajax({
+        url: `/user/shopfilter?${queryParams.toString()}`,
+        method: 'GET',
+        success: function (response) {
+            renderProducts(response.products);
+        },
+        error: function (error) {
+            console.error("Error fetching filtered products:", error);
+        }
+    });
+}
+
+});
 
 function renderProducts(products) {
     let productGrid = $('.product-grid-4');
-    productGrid.empty(); // Clear existing products
+    productGrid.empty();
 
     products.forEach(product => {
         let productHtml = `
@@ -1304,18 +1226,148 @@ function renderProducts(products) {
                         <div class="product-img product-img-zoom">
                             <a href="/user/product/${product._id}">`;
 
-        // Loop through colors to get images
-        if (product.colors) {
-            let colorKeys = Array.isArray(product.colors) ? product.colors : Object.keys(product.colors);
+        if (product.colors && Object.keys(product.colors).length > 0) {
+            for (const color in product.colors) {
+                const colorImages = product.colors[color].images;
+                if (colorImages && colorImages.length >= 2) {
+                    productHtml += `
+                        <img class="default-img" src="/uploads/${colorImages[0]}" alt="">
+                        <img class="hover-img" src="/uploads/${colorImages[1]}" alt="">`;
+                    break;
+                }
+            }
+        } else {
+            productHtml += `<img class="default-img" src="/uploads/default-image.jpg" alt="">`;
+        }
 
-            // Retrieve the first two images
+        productHtml += `</a>
+                        </div>
+                    </div>
+                    <div class="product-content-wrap">
+                        <div class="product-category">
+                            <a href="#">${product.description}</a>
+                        </div>
+                        <h2><a href="/user/product/${product._id}">${product.name}</a></h2>
+                        <div class="product-price">
+                            <span>Rs: ${product.price}</span>
+                        </div>
+                        ${product.stock === 0 ? `<p style="color: red;">Out of stock</p>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        
+        productGrid.append(productHtml);
+    });
+}
+
+
+    </script> -->
+    <script>
+        $(document).ready(function () {
+    $("#slider-range").slider({
+        range: true,
+        min: 0,
+        max: 50000,
+        values: [0, 5000],
+        slide: function (event, ui) {
+            $("#amount").val("Rs" + ui.values[0] + " - Rs" + ui.values[1]);
+            $("#min_price").val(ui.values[0]);
+            $("#max_price").val(ui.values[1]);
+        },
+        change: function () {
+            applyFilters();
+        }
+    });
+
+    $("#amount").val("Rs" + $("#slider-range").slider("values", 0) +
+        " - Rs" + $("#slider-range").slider("values", 1));
+    $("#min_price").val($("#slider-range").slider("values", 0));
+    $("#max_price").val($("#slider-range").slider("values", 1));
+    
+    let selectedSort = 'featured';
+
+    $('.category-filter').on('change', function (e) {
+        applyFilters();
+    });
+
+    $('.color-filter, .size-filter').on('click', function (e) {
+        applyFilters();
+    });
+
+    $('#search-input').on('input', function () {
+        applyFilters();
+    });
+
+    $('.sort-option').on('click', function (e) {
+        e.preventDefault();
+        selectedSort = $(this).data('sort');
+        $('#selected-sort').text($(this).text());
+        $('.sort-option').removeClass('active');
+        $(this).addClass('active');
+        applyFilters();
+    });
+
+    function applyFilters() {
+        const selectedCategory = $('.category-filter:checked').map(function () {
+            return $(this).data('category');
+        }).get();
+
+        const selectedColor = $('.color-filter:checked').map(function () {
+            return $(this).val();
+        }).get();
+
+        const selectedSize = $('.size-filter:checked').map(function () {
+            return $(this).val();
+        }).get();
+
+        const minPrice = $("#min_price").val();
+        const maxPrice = $("#max_price").val();
+        const searchTerm = $('#search-input').val().trim();
+
+        const queryParams = new URLSearchParams();
+        if (selectedCategory.length) queryParams.append('category', selectedCategory.join(','));
+        if (selectedColor.length) queryParams.append('color', selectedColor.join(','));
+        if (selectedSize.length) queryParams.append('sizes', selectedSize.join(','));
+        if (minPrice && maxPrice) {
+            queryParams.append('min_price', minPrice);
+            queryParams.append('max_price', maxPrice);
+        }
+        if (selectedSort) queryParams.append('sort', selectedSort);
+        if (searchTerm) queryParams.append('name', searchTerm);
+        $.ajax({
+            url: `/user/shopfilter?${queryParams.toString()}`,
+            method: 'GET',
+            success: function (response) {
+                renderProducts(response.products);
+            },
+            error: function (error) {
+                console.error("Error fetching filtered products:", error);
+            }
+        });
+    }
+});
+
+function renderProducts(products) {
+    let productGrid = $('.product-grid-4');
+    productGrid.empty();
+
+    products.forEach(product => {
+        let productHtml = `
+            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                <div style="height: 450px;" class="product-cart-wrap mb-30">
+                    <div class="product-img-action-wrap">
+                        <div class="product-img product-img-zoom">
+                            <a href="/user/product/${product._id}">`;
+
+        if (product.colors) {
+            let colorKeys = Object.keys(product.colors);
             for (let i = 0; i < colorKeys.length; i++) {
                 let color = product.colors[colorKeys[i]];
                 if (color && color.images && color.images.length > 1) {
                     productHtml += `
                         <img class="default-img" src="/uploads/${color.images[0]}" alt="">
                         <img class="hover-img" src="/uploads/${color.images[1]}" alt="">`;
-                    break; // Break after adding images from the first color with images
+                    break;
                 }
             }
         }
@@ -1341,7 +1393,6 @@ function renderProducts(products) {
 }
 
     </script>
-    
 </body>
 
 

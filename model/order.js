@@ -10,10 +10,6 @@ const orderItemSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    size: {
-        type: String,
-        required: true
-    },
     quantity: {
         type: Number,
         required: true,
@@ -23,6 +19,15 @@ const orderItemSchema = new mongoose.Schema({
     price: {
         type: Number,
         required: true
+    },
+    status: {
+        type: String,
+        enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned", "Confirmed"],
+        default: 'Pending'
+    },
+    refundAmount: {
+        type: Number,
+        default: 0 
     }
 });
 
@@ -34,52 +39,41 @@ const orderSchema = new mongoose.Schema({
     },
     items: [orderItemSchema],
     billingAddress: {
-        address:{
-            type:String,
-          
-        },
-        number:{
-            type:String,
-            
-        },
-        pincode:{
-            type:String,
-            
-        } ,
-        country:{
-            type:String,
-            
-        },
-        state:{
-            type:String,
-            
-        },
-        city:{
-            type:String,
-            
-        },
-        name:{
-            type:String,
-            
-        }
-        
+        address: String,
+        number: String,
+        pincode: String,
+        country: String,
+        state: String,
+        city: String,
+        name: String,
     },
     paymentMethod: {
-        type:String,
-        default:'COD'
+        type: String,
+        default: 'COD'
     },
-    paymentStatus:{
-        type:String
+    paymentStatus: {
+        type: String,
+        enum: ['Pending', 'Paid', 'Failed'],
+        default: 'Pending'
     },
     totalPrice: {
         type: Number,
-        
+        required: true 
     },
-    status: {
-        type: String,
-        enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned","Confirmed"],
-        default: 'pending'
+    discount: {
+        type: Number,
+        default: 0 
+    },
+    coupon: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Coupon',
+        default: null 
+    },
+    deliveryCharge: {
+         type: Number, 
+         default: 40
     }
+    
 }, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);

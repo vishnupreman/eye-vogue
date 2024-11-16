@@ -24,7 +24,7 @@
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
             <a href="index.html" class="brand-wrap">
-                <img src="http://localhost:3000/admin/assets/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+                <img src="assets/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
@@ -33,12 +33,12 @@
         <nav>
             <ul class="menu-aside">
                 <li class="menu-item ">
-                    <a class="menu-link" href="home"> <i class="icon material-icons md-home"></i>
+                    <a class="menu-link" href="/admin/home"> <i class="icon material-icons md-home"></i>
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
                 <li class="menu-item ">
-                    <a class="menu-link" href="products"> <i class="icon material-icons md-shopping_bag"></i>
+                    <a class="menu-link" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text">Products</span>
                     </a>
                     <!-- <div class="submenu">
@@ -49,7 +49,7 @@
                     </div> -->
                 </li>
                 <li class="menu-item active">
-                    <a class="menu-link" href="order"> <i class="icon material-icons md-shopping_cart"></i>
+                    <a class="menu-link" href="/admin/order"> <i class="icon material-icons md-shopping_cart"></i>
                         <span class="text">Orders</span>
                     </a>
                     <!-- <div class="submenu">
@@ -103,17 +103,29 @@
                         <span class="text">Reviews</span>
                     </a>
                 </li> -->
-                <li class="menu-item ">
-                    <a class="menu-link" href="brands"> <i class="icon material-icons md-stars"></i>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Brands</span> </a>
                 </li>
-                <li class="menu-item ">
-                    <a class="menu-link" href="category"> <i class="icon material-icons md-stars"></i>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Categories</span> </a>
                 </li>
                 <li class="menu-item ">
-                    <a class="menu-link" href="users"> <i class="icon material-icons md-person"></i>
+                    <a class="menu-link" href="/admin/users"> <i class="icon material-icons md-person"></i>
                         <span class="text">users</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link" href="/admin/coupon"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Coupon</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="/admin/offers"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Offers</span> </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link " href="/admin/salesreport"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Sales Report</span> </a>
                 </li>
                 <!-- <li class="menu-item">
                     <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
@@ -214,16 +226,10 @@
                             <small class="text-muted">Order ID: 3453012</small>
                         </div>
                         <div class="col-lg-6 col-md-6 ms-auto text-md-end">
-                            <select class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
-                                <option>Change status</option>
-                                <option>Awaiting payment</option>
-                                <option>Confirmed</option>
-                                <option>Shipped</option>
-                                <option>Delivered</option>
-                            </select>
-                            <a class="btn btn-primary" href="#">Save</a>
+                           
                             <a class="btn btn-secondary print ms-2" href="#"><i class="icon material-icons md-print"></i></a>
                         </div>
+                        
                     </div>
                 </header> <!-- card-header end// -->
                 <div class="card-body">
@@ -282,60 +288,66 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th width="40%">Product</th>
-                                            <th width="20%">Unit Price</th>
-                                            <th width="20%">Quantity</th>
-                                            <th width="20%" class="text-end">Total</th>
+                                            <th width="30%">Product</th>
+                                            <th width="15%">Unit Price</th>
+                                            <th width="15%">Quantity</th>
+                                            <th width="15%" class="text-end">Total</th>
+                                            <th width="25%">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <% order.items.forEach(item => { %>
                                         <tr>
                                             <td>
                                                 <a class="itemside" href="#">
                                                     <div class="left">
-                                                        <% order.items.forEach(item => { %>
-                                                            
-                                                            <!-- <img src="/uploads/" width="40" height="40" class="img-xs" alt="Item"> -->
-                                                            
+                                                        <!-- Display Product Image -->
                                                         <% if (item.product.colors[item.color] && item.product.colors[item.color].images.length > 0) { %>
-                                                            <img src="/uploads/<%= item.product.colors[item.color].images[0] %>" alt="<%= item.product.name %> width="40" height="40" class="img-xs">
+                                                            <img src="/uploads/<%= item.product.colors[item.color].images[0] %>" alt="<%= item.product.name %>" width="40" height="40" class="img-xs">
                                                         <% } else { %>
-                                                            <img src="/uploads/default-image.jpg" alt="Default Image" class="product-image">
-                                                        <% } %> 
-                                                       <% }); %>
+                                                            <img src="/uploads/default-image.jpg" alt="Default Image" class="product-image" width="40" height="40">
+                                                        <% } %>
                                                     </div>
-                                                    <div class="info"> <% order.items.forEach(element => { %>
-                                                        
-                                                             <%= element.product.name.toUpperCase() %> <br>
-                                                              <%= element.color.toUpperCase() %> <br>
-                                                              <%= element.size.toUpperCase() %> <br>
-                                                       
-                                                   <% }); %> </div>
+                                                    <div class="info">
+                                                        <strong><%= item.product.name %></strong><br>
+                                                        Color: <%= item.color %> <br>
+                                                        Size: <%= item.size %> <br>
+                                                    </div>
                                                 </a>
                                             </td>
-                                            <td><%= price %> </td>
-                                            <td> <%= quantity %> </td>
-                                            <td class="text-end"> <%= totalPrice %> </td>
+                                            <td>Rs. <%= item.price %> </td>
+                                            <td><%= item.quantity %></td>
+                                            <td class="text-end">Rs. <%= item.price * item.quantity %> </td>
+                                            <td>
+                                                <!-- Dropdown for Status Change -->
+                                                <select class="form-select" onchange="updateItemStatus('<%= order._id %>', '<%= item._id %>', this)">
+                                                    <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                                    <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                    <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                                </select>
+                                                <!-- Status Update Message -->
+                                                <div id="statusMessage-<%= item._id %>" class="status-message text-success small mt-1"></div>
+                                            </td>
                                         </tr>
-                                       
-                        
+                                        <% }); %>
                                         <tr>
-                                            <td colspan="4">
-                                                <article class="float-end">
-                                                    <dl class="dlist">
+                                            <td colspan="5">
+                                                <article class="float-end text-end" style="padding-top: 10px; border-top: 1px solid #e9ecef;">
+                                                    <dl class="dlist mb-2">
                                                         <dt>Subtotal:</dt>
-                                                        <dd><%= totalPrice %></dd>
+                                                        <dd>Rs. <%= order.totalPrice %></dd>
                                                     </dl>
-                                                    <dl class="dlist">
+                                                    <dl class="dlist mb-2">
                                                         <dt>Shipping cost:</dt>
-                                                        <dd>$10.00</dd>
+                                                        <dd>Rs. 10.00</dd>
                                                     </dl>
-                                                    <dl class="dlist">
+                                                    <dl class="dlist mb-2">
                                                         <dt>Grand total:</dt>
-                                                        <dd> <b class="h5"><%= totalPrice %></b> </dd>
+                                                        <dd><strong class="h5">Rs. <%= order.totalPrice + 10 %></strong></dd>
                                                     </dl>
-                                                    <dl class="dlist">
-                                                        <dt class="text-muted">Status:</dt>
+                                                    <dl class="dlist mb-0">
+                                                        <dt class="text-muted">Order Status:</dt>
                                                         <dd>
                                                             <span class="badge rounded-pill alert-success text-success"><%= order.status %></span>
                                                         </dd>
@@ -347,25 +359,8 @@
                                 </table>
                             </div> <!-- table-responsive// -->
                         </div> <!-- col// -->
-                        <div class="col-lg-1"></div>
-                        <div class="col-lg-4">
-                            <div class="box shadow-sm bg-light">
-                                <h6 class="mb-15">Payment info</h6>
-                                <p>
-                                    <img src="http://localhost:3000/admin/assets/imgs/card-brands/2.png" class="border" height="20"> Master Card **** **** 4768 <br>
-                                    Business name: Grand Market LLC <br>
-                                    Phone: +1 (800) 555-154-52
-                                </p>
-                            </div>
-                            <div class="h-25 pt-4">
-                                <div class="mb-3">
-                                    <label>Notes</label>
-                                    <textarea class="form-control" name="notes" id="notes" placeholder="Type some note"></textarea>
-                                </div>
-                                <button class="btn btn-primary">Save note</button>
-                            </div>
-                        </div> <!-- col// -->
-                    </div>
+                    </div>  <!-- row// -->
+                    
                 </div> <!-- card-body end// -->
             </div> <!-- card end// -->
         </section> <!-- content-main end// -->
@@ -392,7 +387,46 @@
     <!-- Main Script -->
     <script src="http://localhost:3000/admin/assets/js/main.js" type="text/javascript"></script>
 </body>
+<script>
+    function updateItemStatus(orderId, itemId, selectElement) {
+        console.log(orderId,itemId,selectElement);
+        
+        const newStatus = selectElement.value;
+        const statusMessage = document.getElementById(`statusMessage-${itemId}`);
 
+        fetch(`/admin/orderdetails/update-item-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId, itemId, status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusMessage.textContent = 'Status updated successfully';
+                statusMessage.classList.add('text-success');
+                statusMessage.classList.remove('text-danger');
+            } else {
+                statusMessage.textContent = 'Failed to update status';
+                statusMessage.classList.add('text-danger');
+                statusMessage.classList.remove('text-success');
+            }
+            setTimeout(() => {
+                statusMessage.textContent = ''; // Clear message after a delay
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            statusMessage.textContent = 'Error updating status';
+            statusMessage.classList.add('text-danger');
+            statusMessage.classList.remove('text-success');
+            setTimeout(() => {
+                statusMessage.textContent = ''; // Clear message after a delay
+            }, 3000);
+        });
+    }
+</script>
 
 <!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-orders-detail.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:22 GMT -->
 </html>

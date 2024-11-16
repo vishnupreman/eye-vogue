@@ -7,7 +7,12 @@ const { renderHome, renderProducts, renderBrands,
     editCategory, renderUsers, blockUser, unblockUser, addBrands,
     renderEditBrands, editBrands, unlistBrands, listBrands,
     addProduct, unpublishProduct, publishProduct, renderEditProduct, editproduct,
-    deleteImage,cancelOrder ,renderOrderDetailPage} = require('../controllers/admin.Controller')
+    deleteImage,cancelOrder ,renderOrderDetailPage,renderCouponPage,
+    renderAddCouponPage,createCoupon,deactivateCoupon,deleteCoupon,renderOfferPage,
+    renderAddOffers,createOffers,offerListUnlist,deleteOffer,updateItemStatus,
+    renderSalesReportPage,
+    downloadExcelSalesReport,
+    downloadPdfSalesReport,} = require('../controllers/admin.Controller')
 
 const upload = require('../middleware/upload')
 router.route('/home').get(renderHome)
@@ -39,8 +44,8 @@ router.route('/editproduct/:id').get(renderEditProduct).post(upload.fields([
 
 router.route('/deleteimage').post(deleteImage)
 
-//orders
-router.route('/order').get(renderOrders)
+
+
 
 //categories
 router.route('/category').get(renderCategories)
@@ -55,6 +60,27 @@ router.route('/block/:id').post(blockUser)
 router.route('/unblock/:id').post(unblockUser)
 
 //order
+router.route('/order').get(renderOrders)
 router.route('/cancelorder/:orderId').post(cancelOrder)
 router.route('/orderdetails/:id').get(renderOrderDetailPage)
+router.route('/orderdetails/update-item-status').post(updateItemStatus)
+
+//coupon
+router.route('/coupon').get(renderCouponPage)
+router.route('/addcoupon').get(renderAddCouponPage)
+router.route('/createcoupon').post(createCoupon)
+router.route('/deactivatecoupon/:id').post(deactivateCoupon)
+router.route('/deletecoupon/:id').delete(deleteCoupon)
+
+//OFFERS
+router.route('/offers').get(renderOfferPage)
+router.route('/addoffers').get(renderAddOffers).post(createOffers)
+router.route('/list_unlist_offers/:id/toggle-list').post(offerListUnlist)
+router.route('/delete_offer/:id').post(deleteOffer)
+
+//salesreport
+router.route('/salesreport').get(renderSalesReportPage)
+router.route('/download-excel-salesreport').get(downloadExcelSalesReport)
+router.route('/download-pdf-salesreport').get(downloadPdfSalesReport)
+
 module.exports = router

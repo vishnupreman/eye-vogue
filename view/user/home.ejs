@@ -250,7 +250,7 @@
                         <div class="header-action-right">
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
-                                    <a href="shop-wishlist.html">
+                                    <a href="/user/wishlist">
                                         <img class="svgInject" alt="Evara" src="assets/imgs/theme/icons/icon-heart.svg">
                                         <span class="pro-count blue">4</span>
                                     </a>
@@ -506,27 +506,9 @@
                                     <li class="position-static"><a href="/user/myaccount">My Profile</a>
                                         
                                     </li>
-                                    <li><a href="blog-category-grid.html">Category <i class="fi-rs-angle-down"></i></a>
-                                        <ul class="sub-menu">
-                                            <% category.forEach(element => {%>
-                                                <li><a href="blog-category-grid.html"><%= element.name %></a></li>
-                                                
-                                           <% }); %>
-                                                                                                                                                                       
-                                            </li>
-                                        </ul>
-                                    </li>
+                                    
                                     <li><a href="#">Pages <i class="fi-rs-angle-down"></i></a>
-                                        <ul class="sub-menu">
-                                            <li><a href="page-about.html">About Us</a></li>
-                                            <li><a href="page-contact.html">Contact</a></li>
-                                            <li><a href="page-account.html">My Account</a></li>
-                                            <li><a href="page-login-register.html">login/register</a></li>
-                                            <li><a href="page-purchase-guide.html">Purchase Guide</a></li>
-                                            <li><a href="page-privacy-policy.html">Privacy Policy</a></li>
-                                            <li><a href="page-terms.html">Terms of Service</a></li>
-                                            <li><a href="page-404.html">404 Page</a></li>
-                                        </ul>
+                                        
                                     </li>
                                     <li>
                                         <a href="page-contact.html">Contact</a>
@@ -890,17 +872,18 @@
                 <div class="tab-content wow fadeIn animated" id="myTabContent">
                     <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
                         <div class="row product-grid-4">
-                            <% product.forEach(element => {%>
+                            <% products.forEach(element => { %>
                             <div class="col-lg-3 col-md-4 col-12 col-sm-6">
                                 <div style="height: 450px;" class="product-cart-wrap mb-30">
                                     <div class="product-img-action-wrap">
                                         <div class="product-img product-img-zoom">
                                             <a href="/user/product/<%= element._id %>">
                                                 <% for (let color in element.colors) { %>
-                                                    <% let colorObj = element.colors[color] %>
+                                                    <% let colorObj = element.colors[color]; %>
                                                     <% if (colorObj && colorObj.images && colorObj.images.length > 0) { %>
                                                         <img class="default-img" src="/uploads/<%= colorObj.images[0] %>" alt="">
                                                         <img class="hover-img" src="/uploads/<%= colorObj.images[1] %>" alt="">
+                                                        <% break; %> <!-- Display images from the first color with images available -->
                                                     <% } %>
                                                 <% } %>
                                             </a>
@@ -910,9 +893,11 @@
                                             <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
                                             <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                         </div>
-                                        <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="hot">Hot</span>
-                                        </div>
+                                        <% if (element.bestOffer) { %>
+                                            <div class="product-badges product-badges-position product-badges-mrg">
+                                                <span class="sale">Sale</span> <!-- Badge indicating an offer -->
+                                            </div>
+                                        <% } %>
                                     </div>
                                     <div class="product-content-wrap">
                                         <div class="product-category">
@@ -920,34 +905,40 @@
                                         </div>
                                         <h2><a href="shop-product-right.html"><%= element.name %></a></h2>
                                         <div class="rating-result" title="90%">
-                                            <span>
-                                                <span>90%</span>
-                                            </span>
+                                            <span><span></span></span>
                                         </div>
+                        
                                         <div class="product-price">
-                                            <span>Rs:<%= element.price %> </span>
-                                            <!-- <span class="old-price">$245.8</span> -->
-                                        </div>
-                                        
-                                        <div class="product-action-1 show">
-                                            <% if (element.stock===0){%>
-                                                <p style="color: red;">Out of stock</p>
-                                            <%  }else{ %>
-                                            <!-- <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a> -->
+                                            <% if (element.discountedPrice) { %>
+                                                <!-- Show discounted price -->
+                                                <span class="discounted-price">Rs: <%= element.discountedPrice.toFixed(2) %></span>
+                                                <!-- Show original price with strikethrough if discounted -->
+                                                <span class="original-price" style="text-decoration: line-through; color: #888;">
+                                                    Rs: <%= element.price.toFixed(2) %>
+                                                </span>
+                                            <% } else { %>
+                                                <!-- No discount, show original price only -->
+                                                <span>Rs: <%= element.price.toFixed(2) %></span>
                                             <% } %>
                                         </div>
-                    
-                                    
+                        
+                                        <div class="product-action-1 show">
+                                            <% if (element.stock === 0) { %>
+                                                <p style="color: red;">Out of stock</p>
+                                            <% } else { %>
+                                                <!-- Add to Cart Button or other actions can go here -->
+                                                <button class="btn btn-primary">Add to Cart</button>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                                                                                                            
-                     
-                            
                             <% }); %>
                         </div>
+                        
                         <!--End product-grid-4-->
                     </div>
+                    
                     <!--En tab one (Featured)-->
                    
                     <!--En tab two (Popular)-->
