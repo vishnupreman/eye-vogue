@@ -41,68 +41,15 @@
                     <a class="menu-link" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text">Products</span>
                     </a>
-                    <!-- <div class="submenu">
-                        <a href="page-products-list.html" class="active">Product List</a>
-                        <a href="page-products-grid.html">Product grid</a>
-                        <a href="page-products-grid-2.html">Product grid 2</a>
-                        <a href="page-categories.html">Categories</a>
-                    </div> -->
+                    
                 </li>
                 <li class="menu-item active">
                     <a class="menu-link" href="/admin/order"> <i class="icon material-icons md-shopping_cart"></i>
                         <span class="text">Orders</span>
                     </a>
-                    <!-- <div class="submenu">
-                        <a href="page-orders-1.html">Order list 1</a>
-                        <a href="page-orders-2.html">Order list 2</a>
-                        <a href="page-orders-detail.html">Order detail</a>
-                    </div> -->
+                    
                 </li>
-                <!-- <li class="menu-item ">
-                    <a class="menu-link" href="page-sellers-cards.html"> <i class="icon material-icons md-store"></i>
-                        <span class="text">Sellers</span>
-                    </a> -->
-                    <!-- <div class="submenu">
-                        <a href="page-sellers-cards.html">Sellers cards</a>
-                        <a href="page-sellers-list.html">Sellers list</a>
-                        <a href="page-seller-detail.html">Seller profile</a>
-                    </div> -->
-                <!-- </li> -->
-                <!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-form-product-1.html"> <i class="icon material-icons md-add_box"></i>
-                        <span class="text">Add product</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-form-product-1.html">Add product 1</a>
-                        <a href="page-form-product-2.html">Add product 2</a>
-                        <a href="page-form-product-3.html">Add product 3</a>
-                        <a href="page-form-product-4.html">Add product 4</a>
-                    </div>
-                </li> -->
-                <!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-transactions-1.html"> <i class="icon material-icons md-monetization_on"></i>
-                        <span class="text">Transactions</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-transactions-1.html">Transaction 1</a>
-                        <a href="page-transactions-2.html">Transaction 2</a>
-                    </div>
-                </li> -->
-                <!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="#"> <i class="icon material-icons md-person"></i>
-                        <span class="text">Account</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-account-login.html">User login</a>
-                        <a href="page-account-register.html">User registration</a>
-                        <a href="page-error-404.html">Error 404</a>
-                    </div>
-                </li> -->
-                <!-- <li class="menu-item">
-                    <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
-                        <span class="text">Reviews</span>
-                    </a>
-                </li> -->
+                
                 <li class="menu-item">
                     <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Brands</span> </a>
@@ -127,29 +74,10 @@
                     <a class="menu-link " href="/admin/salesreport"> <i class="icon material-icons md-person"></i>
                         <span class="text">Sales Report</span> </a>
                 </li>
-                <!-- <li class="menu-item">
-                    <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
-                        <span class="text">Statistics</span>
-                    </a>
-                </li> -->
+                
             </ul>
             <hr>
-            <!-- <ul class="menu-aside">
-                <li class="menu-item has-submenu">
-                    <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
-                        <span class="text">Settings</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-settings-1.html">Setting sample 1</a>
-                        <a href="page-settings-2.html">Setting sample 2</a>
-                    </div>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="page-blank.html"> <i class="icon material-icons md-local_offer"></i>
-                        <span class="text"> Starter page </span>
-                    </a>
-                </li>
-            </ul> -->
+            
             <br>
             <br>
         </nav>
@@ -282,84 +210,113 @@
                             </article>
                         </div> <!-- col// -->
                     </div> <!-- row // -->
-                    <div class="row">
-                        <div class="col-lg-7">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th width="30%">Product</th>
-                                            <th width="15%">Unit Price</th>
-                                            <th width="15%">Quantity</th>
-                                            <th width="15%" class="text-end">Total</th>
-                                            <th width="25%">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% order.items.forEach(item => { %>
-                                        <tr>
+                    <div id="notification"></div>
+                    <div class="container-fluid mt-4">
+                        <div class="row">
+                          <div class="col-lg-12">
+                            <div class="card">
+                              <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                          <tr>
+                                            <th style="width: 40%">Product</th>
+                                            <th style="width: 15%">Unit Price</th>
+                                            <th style="width: 10%">Quantity</th>
+                                            <th style="width: 15%" class="text-end">Total</th>
+                                            <th style="width: 20%">Change Status</th>
+                                            <th style="width: 10%">Status</th>
+                                            <th style="width: 10%">Pending Approval</th>
+                                            <th style="width: 15%">Return Reason</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <% order.items.forEach(item => { %>
+                                          <tr>
                                             <td>
-                                                <a class="itemside" href="#">
-                                                    <div class="left">
-                                                        <!-- Display Product Image -->
-                                                        <% if (item.product.colors[item.color] && item.product.colors[item.color].images.length > 0) { %>
-                                                            <img src="/uploads/<%= item.product.colors[item.color].images[0] %>" alt="<%= item.product.name %>" width="40" height="40" class="img-xs">
-                                                        <% } else { %>
-                                                            <img src="/uploads/default-image.jpg" alt="Default Image" class="product-image" width="40" height="40">
-                                                        <% } %>
-                                                    </div>
-                                                    <div class="info">
-                                                        <strong><%= item.product.name %></strong><br>
-                                                        Color: <%= item.color %> <br>
-                                                        Size: <%= item.size %> <br>
-                                                    </div>
-                                                </a>
+                                              <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0 me-3">
+                                                  <% if (item.product.colors[item.color] && item.product.colors[item.color].images.length > 0) { %>
+                                                    <img src="/uploads/<%= item.product.colors[item.color].images[0] %>" alt="<%= item.product.name %>" width="50" height="50" class="img-thumbnail">
+                                                  <% } else { %>
+                                                    <img src="/uploads/default-image.jpg" alt="Default Image" class="img-thumbnail" width="50" height="50">
+                                                  <% } %>
+                                                </div>
+                                                <div>
+                                                  <h6 class="mb-0"><%= item.product.name %></h6>
+                                                  <small class="text-muted">
+                                                    Color: <%= item.color %> <br>
+                                                    Size: <%= item.size %>
+                                                  </small>
+                                                </div>
+                                              </div>
                                             </td>
-                                            <td>Rs. <%= item.price %> </td>
+                                            <td>Rs. <%= item.price.toFixed(2) %></td>
                                             <td><%= item.quantity %></td>
-                                            <td class="text-end">Rs. <%= item.price * item.quantity %> </td>
+                                            <td class="text-end">Rs. <%= (item.price * item.quantity).toFixed(2) %></td>
                                             <td>
-                                                <!-- Dropdown for Status Change -->
-                                                <select class="form-select" onchange="updateItemStatus('<%= order._id %>', '<%= item._id %>', this)">
-                                                    <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                                    <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                                    <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                                </select>
-                                                <!-- Status Update Message -->
-                                                <div id="statusMessage-<%= item._id %>" class="status-message text-success small mt-1"></div>
+                                              <select class="form-select form-select-sm" onchange="updateItemStatus('<%= order._id %>', '<%= item._id %>', this)">
+                                                <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                                <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                                <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                              </select>
+                                              <div id="statusMessage-<%= item._id %>" class="status-message text-success small mt-1"></div>
                                             </td>
-                                        </tr>
-                                        <% }); %>
-                                        <tr>
-                                            <td colspan="5">
-                                                <article class="float-end text-end" style="padding-top: 10px; border-top: 1px solid #e9ecef;">
-                                                    <dl class="dlist mb-2">
-                                                        <dt>Subtotal:</dt>
-                                                        <dd>Rs. <%= order.totalPrice %></dd>
-                                                    </dl>
-                                                    <dl class="dlist mb-2">
-                                                        <dt>Shipping cost:</dt>
-                                                        <dd>Rs. 10.00</dd>
-                                                    </dl>
-                                                    <dl class="dlist mb-2">
-                                                        <dt>Grand total:</dt>
-                                                        <dd><strong class="h5">Rs. <%= order.totalPrice + 10 %></strong></dd>
-                                                    </dl>
-                                                    <dl class="dlist mb-0">
-                                                        <dt class="text-muted">Order Status:</dt>
-                                                        <dd>
-                                                            <span class="badge rounded-pill alert-success text-success"><%= order.status %></span>
-                                                        </dd>
-                                                    </dl>
-                                                </article>
+                                            <td><%= item.status %></td>
+                                            <td><%= item.adminApproval ? 'Approved' : 'Pending Approval' %></td>
+                                            <td>
+                                              <% if (item.status === 'Returned' && item.returnReason) { %>
+                                                <span class="text-muted"><%= item.returnReason %></span>
+                                              <% } else { %>
+                                                <span class="badge bg-secondary">N/A</span>
+                                              <% } %>
                                             </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div> <!-- table-responsive// -->
-                        </div> <!-- col// -->
-                    </div>  <!-- row// -->
+                                            <td>
+                                              <% if (item.status === 'Returned') { %>
+                                                <% if (!item.adminApproval) { %>
+                                                  <button 
+                                                    class="btn btn-sm btn-success" 
+                                                    onclick="approveReturn('<%= order._id %>', '<%= item._id %>')">
+                                                    Approve
+                                                  </button>
+                                                <% } else { %>
+                                                  <span class="badge bg-success">Approved</span>
+                                                <% } %>
+                                              <% } else { %>
+                                                <span class="badge bg-secondary">N/A</span>
+                                              <% } %>
+                                            </td>
+                                          </tr>
+                                          <% }); %>
+                                        </tbody>
+                                      </table>
+                                      
+                                </div>
+                                <div class="row mt-4">
+                                  <div class="col-md-6 offset-md-6">
+                                    <div class="card">
+                                      <div class="card-body">
+                                        <h5 class="card-title">Order Summary</h5>
+                                        <div class="d-flex justify-content-between mb-2">
+                                          <span>Subtotal:</span>
+                                          <span>Rs. <%= order.totalPrice.toFixed(2) %></span>
+                                        </div>
+                                       
+                                        <div class="d-flex justify-content-between mb-2">
+                                          <span class="fw-bold">Grand total:</span>
+                                          <span class="fw-bold">Rs. <%= (order.totalPrice).toFixed(2) %></span>
+                                        </div>
+                                       
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div> <!-- row// -->
                     
                 </div> <!-- card-body end// -->
             </div> <!-- card end// -->
@@ -377,6 +334,8 @@
                     </div>
                 </div>
             </div>
+           >
+
         </footer>
     </main>
     <script src="http://localhost:3000/admin/assets/js/vendors/jquery-3.6.0.min.js"></script>
@@ -427,6 +386,46 @@
         });
     }
 </script>
+
+<script>
+    function approveReturn(orderId, itemId) {
+        fetch(`/admin/order/approve-return/${orderId}/${itemId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            const notification = document.getElementById('notification');
+            if (data.success) {
+                notification.innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Return approved successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                setTimeout(() => window.location.reload(), 2000); // Reload after 2 seconds
+            } else {
+                notification.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Failed to approve return.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const notification = document.getElementById('notification');
+            notification.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error while approving return.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        });
+    }
+</script>
+
+
 
 <!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-orders-detail.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:22 GMT -->
 </html>

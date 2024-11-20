@@ -13,6 +13,7 @@ const {applyBestOfferToProduct} = require('../utility/bestoffer')
 const moment = require('moment');
 const ExcelJS = require('exceljs')
 const PDFDocument  = require('pdfkit')
+const {handleRefund} = require('../utility/handlerefund')
 
 
 const renderHome = async (req, res) => {
@@ -32,15 +33,57 @@ const renderHome = async (req, res) => {
 }
 
 const renderProducts = async (req, res) => {
-    const product = await productModel.find()
-    const success_message = req.flash('success-message')
-    console.log('product is', product);
-    res.render('products', { product, success_message })
-}
+    try {
+        const page = parseInt(req.query.page) || 1; 
+        const limit = 10; 
+        const skip = (page - 1) * limit;
+
+     
+        const products = await productModel
+            .find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 }); 
+
+        
+        const totalProducts = await productModel.countDocuments();
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        const success_message = req.flash('success-message');
+
+        res.render('products', {
+            products,
+            currentPage: page,
+            totalPages,
+            success_message,
+        });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 
 const renderBrands = async (req, res) => {
-    const brands = await brandModel.find()
-    res.render('brands', { brands })
+    try {
+        const page = parseInt(req.query.page) || 1
+        const limit = 10;
+        const skip = (page - 1) * limit;
+        const brands = await brandModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({createdAt:-1})
+
+        const totalBrands = await brandModel.countDocuments()
+        const totalPages = Math.ceil(totalBrands / limit)
+
+
+        res.render('brands', { brands ,currentPage: page, totalPages})
+    } catch (error) {
+        console.log(error);
+        
+    }
 }
 
 const renderAddProducts = async (req, res) => {
@@ -51,8 +94,24 @@ const renderAddProducts = async (req, res) => {
 }
 
 const renderCategories = async (req, res) => {
-    const category = await categoryModel.find()
-    res.render('category', { category })
+    try {
+        const page = parseInt(req.query.page) || 1
+        const limit = 10
+        const skip = (page - 1) * limit
+
+        const category = await categoryModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+
+        const totalCategories = await categoryModel.countDocuments()
+        const totalPages = Math.ceil(totalCategories / limit)
+
+        res.render('category', { category ,  currentPage: page, totalPages, })
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 
@@ -70,8 +129,25 @@ const renderEditCategory = async (req, res) => {
     res.render('editcategory', { category, error_message })
 }
 const renderUsers = async (req, res) => {
-    const users = await userModel.find()
-    res.render('users', { users })
+    try {
+        const page = parseInt(req.query.page) || 1
+        const limit = 10
+        const skip = (page - 1) * limit
+
+        const users = await userModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+
+        const totalUsers = await userModel.countDocuments()
+        const totalPages = Math.ceil(totalUsers / limit)
+
+        res.render('users', { users ,currentPage: page, totalPages,})
+        
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 const addCategories = async (req, res) => {
@@ -469,8 +545,19 @@ const deleteImage = async (req, res) => {
 
 const renderOrders = async (req, res) => {
     try {
-        const orders = await orderModel.find()
-        res.render('order',{orders})
+        const page = parseInt(req.query.page) || 1
+        const limit = 10
+        const skip = (page-1)*limit
+
+        const orders = await orderModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({createdAt:-1})
+
+        const totalOrders = await orderModel.countDocuments();
+        const totalPages = Math.ceil(totalOrders / limit);
+        res.render('order',{orders,  currentPage: page,totalPages,})
     } catch (error) {
         console.log(error)
     }
@@ -523,6 +610,44 @@ const renderOrderDetailPage = async(req,res)=>{
     }
 }
 
+const approveReturn = async(req,res)=>{
+    const { orderId, itemId } = req.params
+    const userId = req.userId
+    console.log(orderId,itemId);
+    
+    try {
+        const order = await orderModel.findById(orderId)
+        console.log(order,'ooo');
+        
+        const item = order.items.id(itemId)
+
+        console.log(item,'item');
+        
+
+        if (!item || item.status !== 'Returned') {
+            return res.status(400).json({ message: 'Item not eligible for approval' });
+        }
+
+        item.adminApproval=true
+
+        console.log(item,'after approval');
+        
+
+        if(order.paymentMethod==='RazorPay'){
+            console.log('hii');
+            const refundAmount = await handleRefund(order,item,userId)
+            console.log(refundAmount,'ree');
+            
+            item.refundAmount = refundAmount
+        }
+
+        await order.save()
+        res.json({ success: true, message: 'Return approved and refund processed', refundAmount: item.refundAmount })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 const updateItemStatus = async(req,res)=>{
 
     const{ orderId, itemId, status } = req.body
@@ -551,8 +676,19 @@ const updateItemStatus = async(req,res)=>{
 
 const renderCouponPage = async(req,res)=>{
     try {
-        const coupons = await couponModel.find()
-        res.render('coupon',{coupons})
+        const page = parseInt(req.query.page) || 1
+        const limit = 10
+        const skip = (page - 1) * limit
+
+        const coupons = await couponModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+
+        const totalCoupons  = await couponModel.countDocuments()
+        const totalPages = Math.ceil(totalCoupons/limit)
+        res.render('coupon',{coupons,currentPage: page,totalPages})
     } catch (error) {
         console.log(error);
     }
@@ -615,8 +751,19 @@ const deleteCoupon = async(req,res)=>{
 
 const renderOfferPage = async(req,res)=>{
     try {
-        const offers = await offerModel.find()
-        res.render('offers',{offers})
+        const page = parseInt(req.query.page) || 1
+        const limit = 10
+        const skip = (page - 1) * limit
+        const offers = await offerModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({createdAt:-1})
+
+        const totalOffers = await offerModel.countDocuments()
+        const totalPages = Math.ceil(totalOffers/limit)
+
+        res.render('offers',{offers,  currentPage: page,totalPages})
     } catch (error) {
         console.log(error);
         
@@ -949,6 +1096,154 @@ const downloadPdfSalesReport = async (req, res) => {
     }
 }
 
+const adminSalesData = async(req,res)=>{
+    const { filter, startDate, endDate } = req.query;
+    let start, end;
+
+    try {
+        if (filter === 'yearly') {
+            const year = new Date().getFullYear();
+            start = new Date(`${year}-01-01`);
+            end = new Date(`${year}-12-31`);
+        } else if (filter === 'monthly') {
+            const year = new Date().getFullYear();
+            const month = new Date().getMonth() + 1;
+            start = new Date(`${year}-${month}-01`);
+            end = new Date(`${year}-${month + 1}-01`);
+        } else if (filter === 'custom') {
+            start = new Date(startDate);
+            end = new Date(endDate);
+        }
+
+        const salesData = await orderModel.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: start, $lte: end }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    totalSales: { $sum: "$totalPrice" }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+        
+        res.status(200).json({ success: true, salesData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+const getBestSellingItems = async (req, res) => {
+    try {
+        const { type } = req.query; // Determine aggregation type
+console.log(type)
+        let groupByField, lookupCollection, localField, foreignField, projectFields;
+
+        if (type === 'products') {
+            groupByField = '$items.product';
+            lookupCollection = 'productmodels'; // Correct collection for products
+            localField = '_id';
+            foreignField = '_id';
+            projectFields = {
+                _id: 0,
+                productId: '$_id',
+                name: '$productDetails.name',
+                totalQuantity: 1,
+            };
+        } else if (type === 'categories') {
+            groupByField = '$productDetails.category';
+            lookupCollection = 'categories'; // Correct collection for categories
+            localField = '_id';
+            foreignField = '_id';
+            projectFields = {
+                _id: 0,
+                categoryId: '$_id',
+                name: '$categoryDetails.name',
+                totalQuantity: 1,
+            };
+        } else if (type === 'brands') {
+            groupByField = '$productDetails.brandname';
+            lookupCollection = 'brands'; // Correct collection for brands
+            localField = '_id';
+            foreignField = '_id';
+            projectFields = {
+                _id: 0,
+                brandId: '$_id',
+                name: '$brandDetails.name',
+                totalQuantity: 1,
+            };
+        } else {
+            return res.status(400).json({ success: false, message: "Invalid type parameter" });
+        }
+
+        // Aggregation pipeline
+        const aggregationPipeline = [
+            { $unwind: '$items' }, // Unwind items array
+            {
+                
+                    $lookup: {
+                        from: 'productmodels', // Collection name
+                        localField: 'items.product', // Field in orderModel
+                        foreignField: '_id', // Field in productmodels
+                        as: 'productDetails',
+                    },
+                
+            },
+            { 
+                $unwind: { 
+                    path: '$productDetails', 
+                    preserveNullAndEmptyArrays: true, 
+                },
+            },
+            {
+                $group: {
+                    _id: groupByField, // Group by dynamic field
+                    totalQuantity: { $sum: '$items.quantity' }, // Sum the quantities
+                },
+            },
+            { $sort: { totalQuantity: -1 } }, // Sort by total quantity (descending)
+            { $limit: 10 }, // Limit to top 10 results
+        ];
+
+    
+
+            aggregationPipeline.push(
+                {
+                    $lookup: {
+                        from: lookupCollection, // Dynamic collection
+                        localField: '_id', // Dynamic local field
+                        foreignField: '_id', // Dynamic foreign field
+                        as: `${type}Details`,
+                    },
+                },
+                { $unwind: `$${type}Details` } // Unwind the result
+            );
+        
+
+        
+        aggregationPipeline.push({
+            $project: {
+                _id: 0,
+                name:
+                     `$${type}Details.name`,
+                totalQuantity: 1,
+            },
+        });
+
+        // Execute aggregation
+        const bestSellingItems = await orderModel.aggregate(aggregationPipeline);
+console.log(bestSellingItems)
+        return res.status(200).json({ success: true, data: bestSellingItems });
+    } catch (error) {
+        console.error("Error in fetching best-selling items:", error);
+        return res.status(500).json({ success: false, message: "Failed to fetch best-selling items" });
+    }
+};
+
 
 module.exports = {
     renderHome,
@@ -993,5 +1288,8 @@ module.exports = {
     updateItemStatus,
     renderSalesReportPage,
     downloadExcelSalesReport,
-    downloadPdfSalesReport
+    downloadPdfSalesReport,
+    adminSalesData,
+    getBestSellingItems,
+    approveReturn
 }

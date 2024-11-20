@@ -10,9 +10,8 @@ const { renderHome, renderProducts, renderBrands,
     deleteImage,cancelOrder ,renderOrderDetailPage,renderCouponPage,
     renderAddCouponPage,createCoupon,deactivateCoupon,deleteCoupon,renderOfferPage,
     renderAddOffers,createOffers,offerListUnlist,deleteOffer,updateItemStatus,
-    renderSalesReportPage,
-    downloadExcelSalesReport,
-    downloadPdfSalesReport,} = require('../controllers/admin.Controller')
+    renderSalesReportPage, downloadExcelSalesReport,downloadPdfSalesReport,
+    adminSalesData, getBestSellingItems,approveReturn} = require('../controllers/admin.Controller')
 
 const upload = require('../middleware/upload')
 router.route('/home').get(renderHome)
@@ -63,6 +62,7 @@ router.route('/unblock/:id').post(unblockUser)
 router.route('/order').get(renderOrders)
 router.route('/cancelorder/:orderId').post(cancelOrder)
 router.route('/orderdetails/:id').get(renderOrderDetailPage)
+router.route('/order/approve-return/:orderId/:itemId').post(approveReturn)
 router.route('/orderdetails/update-item-status').post(updateItemStatus)
 
 //coupon
@@ -82,5 +82,11 @@ router.route('/delete_offer/:id').post(deleteOffer)
 router.route('/salesreport').get(renderSalesReportPage)
 router.route('/download-excel-salesreport').get(downloadExcelSalesReport)
 router.route('/download-pdf-salesreport').get(downloadPdfSalesReport)
+
+router.route('/sales-data').get(adminSalesData)
+
+//best selling
+router.route('/home/best-selling').get(getBestSellingItems);
+
 
 module.exports = router

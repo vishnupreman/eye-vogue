@@ -349,7 +349,7 @@ button.close:hover {
                                 <tr>
                                     <th>#ID</th>
                                     <th scope="col">Name</th>
-                                    <!-- <th scope="col">Email</th> -->
+                                
                                     <th scope="col">Total</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Quantity</th>
@@ -359,6 +359,10 @@ button.close:hover {
                             </thead>
                             <tbody>
                                 <% orders.forEach((order, index) => { %>
+                                    <% 
+                                    // Check if any item in the order has a pending return request
+                                    const hasPendingReturn = order.items.some(item => item.status === 'Returned' && !item.adminApproval);
+                                    %>
                                     <% order.items.forEach((item, itemIndex) => { %>
                                         <tr>
                                             <% if (itemIndex === 0) { %>
@@ -374,8 +378,13 @@ button.close:hover {
                                                         order.status === 'Pending' ? 'warning' : 
                                                         order.status === 'Shipped' || order.status === 'Delivered' ? 'success' : 
                                                         order.status === 'Cancelled' ? 'danger' : 'primary' 
-                                                    %>"><%= order.status %>
-                                                    </span>
+                                                    %>"><%= order.status %></span>
+                            
+                                                    <% if (hasPendingReturn) { %>
+                                                        <span class="badge rounded-pill alert-warning text-warning">
+                                                            Pending Return
+                                                        </span>
+                                                    <% } %>
                                                 </td>
                                             <% } %>
                                             <td><%= item.quantity %></td>
@@ -389,23 +398,34 @@ button.close:hover {
                                     <% }); %>
                                 <% }); %>
                             </tbody>
+                            
                         </table>
                     </div> <!-- table-responsive //end -->
                 </div>
                    <!-- card-body end// -->
             </div> <!-- card end// -->
-            <div class="pagination-area mt-15 mb-50">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-start">
-                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                        <li class="page-item"><a class="page-link" href="#">02</a></li>
-                        <li class="page-item"><a class="page-link" href="#">03</a></li>
-                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">16</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
-                    </ul>
-                </nav>
-            </div>
+            <!-- Pagination -->
+<div class="pagination-area mt-30 mb-50">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-start">
+            <% if (currentPage > 1) { %>
+                <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a>
+                </li>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+                <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
+</div>
         </section> <!-- content-main end// -->
         <footer class="main-footer font-xs">
             <div class="row pb-30 pt-15">

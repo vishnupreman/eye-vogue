@@ -256,13 +256,13 @@
                                 <div class="header-action-icon-2">
                                     <a href="/user/wishlist">
                                         <img class="svgInject" alt="Evara" src="assets/imgs/theme/icons/icon-heart.svg">
-                                        <span class="pro-count blue">4</span>
+                                        
                                     </a>
                                 </div>
                                 <div class="header-action-icon-2">
                                     <a class="mini-cart-icon" href="/user/cart">
                                         <img alt="Evara" src="assets/imgs/theme/icons/icon-cart.svg">
-                                        <span class="pro-count blue">2</span>
+                                        
                                     </a>
                                     <!-- <div class="cart-dropdown-wrap cart-dropdown-hm2">
                                         <ul>
@@ -499,11 +499,11 @@
                         <div class="main-menu main-menu-padding-1 main-menu-lh-2 d-none d-lg-block">
                             <nav>
                                 <ul>
-                                    <li><a class="active" href="index.html">Home <i class="fi-rs-angle-down"></i></a>
+                                    <li><a  href="/user/home">Home <i class="fi-rs-angle-down"></i></a>
                                         
                                     </li>
                                     
-                                    <li><a href="/user/shop">Shop</a>
+                                    <li><a class="active" href="/user/shop">Shop</a>
                                         
                                 
                                     </li>
@@ -511,19 +511,13 @@
                                         
                                     </li>
                                     
-                                    <li><a href="#">Pages <i class="fi-rs-angle-down"></i></a>
-                                        
-                                    </li>
-                                    <li>
-                                        <a href="page-contact.html">Contact</a>
-                                    </li>
+                                    
+                                   
                                 </ul>
                             </nav>
                         </div>
                     </div>
-                    <div class="hotline d-none d-lg-block">
-                        <p><i class="fi-rs-headset"></i><span>Hotline</span> 1900 - 888 </p>
-                    </div>
+                    
                     <p class="mobile-promotion">Happy <span class="text-brand">Mother's Day</span>. Big Sale Up to 40%</p>
                     <div class="header-action-right d-block d-lg-none">
                         <div class="header-action-2">
@@ -809,67 +803,64 @@
                             </div>
                         </div>
                         <div class="row product-grid-4">
-                            <% products.forEach(element => {%>
-                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                <div style="height: 450px;" class="product-cart-wrap mb-30">
-                                    <div class="product-img-action-wrap">
-                                        <div class="product-img product-img-zoom">
-                                            <a href="/user/product/<%= element._id %>">
-                                                <% for (let color in element.colors) { %>
-                                                    <% let colorObj = element.colors[color] %>
-                                                    <% if (colorObj && colorObj.images && colorObj.images.length > 0) { %>
-                                                        <img class="default-img" src="/uploads/<%= colorObj.images[0] %>" alt="">
-                                                        <img class="hover-img" src="/uploads/<%= colorObj.images[1] %>" alt="">
+                            <% products.forEach(element => { %>
+                                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                    <div style="height: 450px;" class="product-cart-wrap mb-30">
+                                        <div class="product-img-action-wrap">
+                                            <div class="product-img product-img-zoom">
+                                                <a href="/user/product/<%= element._id %>">
+                                                    <% for (let color in element.colors) { %>
+                                                        <% let colorObj = element.colors[color] %>
+                                                        <% if (colorObj && colorObj.images && colorObj.images.length > 0) { %>
+                                                            <img class="default-img" src="/uploads/<%= colorObj.images[0] %>" alt="">
+                                                            <img class="hover-img" src="/uploads/<%= colorObj.images[1] %>" alt="">
+                                                            <% break; %> <!-- Use only the first color's images -->
+                                                        <% } %>
                                                     <% } %>
+                                                </a>
+                                            </div>
+                                            <div class="product-action-1">
+                                                <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
+                                                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                            </div>
+                                            <% if (element.discountedPrice && element.discountedPrice < element.price) { %>
+                                                <div class="product-badges product-badges-position product-badges-mrg">
+                                                    <span class="hot">Save <%= Math.round((1 - (element.discountedPrice / element.price)) * 100) %>%</span>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <div class="product-content-wrap">
+                                            <div class="product-category">
+                                                <a href="shop-grid-right.html"><%= element.description %></a>
+                                            </div>
+                                            <h2><a href="/user/product/<%= element._id %>"><%= element.name %></a></h2>
+                                            <div class="rating-result" title="90%">
+                                                <span>
+                                                    <span>90%</span>
+                                                </span>
+                                            </div>
+                                            <div class="product-price">
+                                                <% if (element.discountedPrice && element.discountedPrice < element.price) { %>
+                                                    <span class="discounted-price">Rs: <%= element.discountedPrice.toFixed(2) %></span>
+                                                    <span class="original-price text-muted" style="text-decoration: line-through;">Rs: <%= element.price.toFixed(2) %></span>
+                                                <% } else { %>
+                                                    <span>Rs: <%= element.price.toFixed(2) %></span>
                                                 <% } %>
-                                            </a>
+                                            </div>
+                                            <div class="product-action-1 show">
+                                                <% if (element.stock === 0) { %>
+                                                    <p style="color: red;">Out of Stock</p>
+                                                <% } else { %>
+                                                    <a aria-label="Add To Cart" class="action-btn hover-up" href="/cart/add/<%= element._id %>"><i class="fi-rs-shopping-bag-add"></i></a>
+                                                <% } %>
+                                            </div>
                                         </div>
-                                        <div class="product-action-1">
-                                            <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
-                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                            <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
-                                        </div>
-                                        <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="hot">Hot</span>
-                                        </div>
-                                    </div>
-                                    <div class="product-content-wrap">
-                                        <div class="product-category">
-                                            <a href="shop-grid-right.html"><%= element.description %></a>
-                                        </div>
-                                        <h2><a href="shop-product-right.html"><%= element.name %></a></h2>
-                                        <div class="rating-result" title="90%">
-                                            <span>
-                                                <span>90%</span>
-                                            </span>
-                                        </div>
-                                        <div class="product-price">
-                                            <% if (element.discountedPrice) { %>
-                                                <span class="discounted-price">Rs: <%= element.discountedPrice %></span>
-                                                <span class="original-price text-muted" style="text-decoration: line-through;">Rs: <%= element.price %></span>
-                                            <% } else { %>
-                                                <span>Rs: <%= element.price %> </span>
-                                            <% } %>
-                                        </div>
-                                        
-                                        
-                                        <div class="product-action-1 show">
-                                            <% if (element.stock===0){%>
-                                                <p style="color: red;">Out of stock</p>
-                                            <%  }else{ %>
-                                            <!-- <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a> -->
-                                            <% } %>
-                                        </div>
-                    
-                                    
                                     </div>
                                 </div>
-                            </div>
-                                                                                                            
-                     
-                            
                             <% }); %>
                         </div>
+                        
                         <!--pagination-->
                         <% if (products.length > 0 && totalPages > 1) { %>
                             <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">

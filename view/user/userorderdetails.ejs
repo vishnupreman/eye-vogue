@@ -89,6 +89,33 @@
                 margin-bottom: 10px;
             }
         }
+
+
+        .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .modal-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
     </style>
 </head>
 <body>
@@ -122,6 +149,7 @@
             <p>
                 Total:<%= orders.totalPrice %><br>
                 Discount:<%= orders.discount %><br>
+                Delivery Charge:<%= orders.deliveryCharge %>
                 
             </p>
         </div>
@@ -199,6 +227,17 @@
         <p>Total:Rs.<%= orders.totalPrice %></p>
     </div>
 
+    <div id="returnModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Reason for Return</h2>
+            <textarea id="returnReason" rows="4" placeholder="Enter the reason for returning the product" style="width: 100%;"></textarea>
+            <div class="modal-actions">
+                <button id="submitReturn" class="btn btn-primary" style="background-color: #088178; border-color: #088178; color: white;">Submit</button>
+                <button id="cancelReturn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Function to handle cancellation
         function cancelItem(orderId, itemId, button) {
@@ -221,25 +260,54 @@
     });
 }
 
+let currentOrderId, currentItemId; // To store IDs for the current item being returned
+
 function returnItem(orderId, itemId, button) {
-    // Similar to cancelItem function for handling returns
-    fetch(`/user/order/return/${orderId}/${itemId}`, {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // You can either update the UI here or simply reload the page
-            window.location.reload(); // Refresh the page after returning the item
-        } else {
-            alert('Failed to return item');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error while returning item');
-    });
+    // Store the order and item IDs
+    currentOrderId = orderId;
+    currentItemId = itemId;
+
+    // Show the modal
+    document.getElementById('returnModal').style.display = 'flex';
 }
+
+// Handle modal actions
+document.getElementById('submitReturn').addEventListener('click', () => {
+    const reason = document.getElementById('returnReason').value.trim();
+
+    if (!reason) {
+        alert('Please enter a reason for the return.');
+        return;
+    }
+
+    // Send the reason along with the request to the server
+    fetch(`/user/order/return/${currentOrderId}/${currentItemId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hide the modal and reload the page
+                document.getElementById('returnModal').style.display = 'none';
+                window.location.reload();
+            } else {
+                alert('Failed to return item');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error while returning item');
+        });
+});
+
+// Close the modal without action
+document.getElementById('cancelReturn').addEventListener('click', () => {
+    document.getElementById('returnModal').style.display = 'none';
+});
     </script>
     
 </body>

@@ -15,7 +15,8 @@ const walletModel = require('../model/wallet')
 const {handleRefund} = require('../utility/handlerefund')
 const fs = require('fs')
 const path = require('path')
-const PDFDocument = require('pdfkit')
+const PDFDocument = require('pdfkit');
+const { log } = require('console');
 
 const renderHome = async (req, res) => {
     try {
@@ -282,27 +283,43 @@ const deleteAddress = async (req, res) => {
 
 const addToCart = async (req, res) => {
     const userId = req.userId;
-    const { id, color } = req.body; 
+    const { id, color } = req.body;
 
     try {
-        
-        const product = await productModel.findById(id);
+      
+        const product = await productModel.findById(id).populate('bestOffer');
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-       
         if (!product.colors[color]) {
             return res.status(400).json({ error: 'This color is not available' });
         }
 
-        
+       
         const availableStock = product.colors[color].quantity;
         if (availableStock <= 0) {
             return res.status(400).json({ error: 'This color is out of stock' });
         }
 
-   
+     
+        let finalPrice = product.price; 
+        const currentDate = new Date();
+
+        if (
+            product.bestOffer &&
+            product.bestOffer.isListed &&
+            product.bestOffer.startDate <= currentDate &&
+            product.bestOffer.endDate >= currentDate
+        ) {
+            if (product.bestOffer.discountType === 'percentage') {
+                const discountAmount = product.price * (product.bestOffer.discountValue / 100);
+                finalPrice = Math.max(product.price - discountAmount, 0); 
+            } else if (product.bestOffer.discountType === 'fixed') {
+                finalPrice = Math.max(product.price - product.bestOffer.discountValue, 0);
+            }
+        }
+
         let cart = await cartModel.findOne({ user: userId });
         if (!cart) {
             cart = new cartModel({
@@ -311,34 +328,36 @@ const addToCart = async (req, res) => {
             });
         }
 
-     
-        const existingItem = cart.items.find(item => 
-            item.product.toString() === id && item.color === color
+        
+        const existingItem = cart.items.find(
+            item => item.product.toString() === id && item.color === color
         );
 
         if (existingItem) {
-    
+           
             const updatedQuantity = existingItem.quantity + 1;
             if (updatedQuantity > availableStock) {
                 return res.status(400).json({ error: 'Quantity exceeds available stock' });
             }
             existingItem.quantity = updatedQuantity;
         } else {
- 
+            
             cart.items.push({
                 product: new mongoose.Types.ObjectId(id),
                 color,
                 quantity: 1,
-                price: product.discountedPrice || product.price, 
+                price: finalPrice, 
             });
         }
 
+       
+        cart.totalPrice = cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-        cart.calculateTotalPrice();  
-
-  
+        
         await cart.save();
 
+        console.log(cart,'cart');
+        
         return res.status(200).json({ message: 'Product successfully added to cart', cart });
     } catch (error) {
         console.log(error);
@@ -347,22 +366,58 @@ const addToCart = async (req, res) => {
 };
 
 
+
 const renderCartPage = async (req, res) => {
-    const userId = req.userId
+    const userId = req.userId;
+
     try {
-        const cart = await cartModel.findOne({ user: userId }).populate('items.product')
+        // Fetch the cart and populate product details
+        const cart = await cartModel.findOne({ user: userId }).populate('items.product');
 
-        const cartItems = cart ? cart.items : []
+        // Ensure we have cart items
+        const cartItems = cart ? cart.items : [];
 
-        console.log(cartItems);
+        const currentDate = new Date();
 
+        // Loop through cart items to update prices dynamically
+        for (let item of cartItems) {
+            const product = item.product;
 
-        res.render('cart', { cart, cartItems })
+            // Ensure the product exists (handles deleted products)
+            if (!product) continue;
 
+            let updatedPrice = product.price; // Default to original price
+
+            // Check if a valid offer applies to the product
+            if (
+                product.bestOffer &&
+                product.bestOffer.isListed &&
+                product.bestOffer.startDate <= currentDate &&
+                product.bestOffer.endDate >= currentDate
+            ) {
+                if (product.bestOffer.discountType === 'percentage') {
+                    const discountAmount = product.price * (product.bestOffer.discountValue / 100);
+                    updatedPrice = Math.max(product.price - discountAmount, 0);
+                } else if (product.bestOffer.discountType === 'fixed') {
+                    updatedPrice = Math.max(product.price - product.bestOffer.discountValue, 0);
+                }
+            }
+
+            // Update the item's price dynamically
+            item.price = updatedPrice;
+        }
+
+        // Recalculate the total price of the cart
+        const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+        // Pass updated cart and cart items to the view
+        res.render('cart', { cart, cartItems, totalPrice });
     } catch (error) {
-        console.log('error')
+        console.error('Error rendering cart page:', error);
+        res.status(500).render('error', { message: 'An error occurred while loading the cart page.' });
     }
-}
+};
+
 
 const updateQuantity = async (req, res) => {
     const { productId, newQuantity, color } = req.body;
@@ -371,61 +426,76 @@ const updateQuantity = async (req, res) => {
     try {
        
         const cart = await cartModel.findOne({ user: userId });
-
         if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
 
-        const item = cart.items.find(item =>
-            item.product.toString() === productId &&
-            item.color === color
+        
+        const item = cart.items.find(
+            item =>
+                item.product.toString() === productId &&
+                item.color === color
         );
 
         if (!item) {
             return res.status(404).json({ success: false, message: 'No item found in the cart' });
         }
 
-     
-        const product = await productModel.findById(productId);
-
+       
+        const product = await productModel.findById(productId).populate('bestOffer');
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
-    
-        const availableStock = product.colors[color].quantity;
-
+        
+        const availableStock = product.colors[color]?.quantity || 0;
         if (newQuantity > availableStock) {
             return res.status(400).json({ success: false, message: 'Quantity exceeds available stock' });
         }
 
+       
         item.quantity = newQuantity;
 
-      
-        let updatedPrice = product.discountedPrice || product.price;
+        
+        let updatedPrice = product.price; 
+        const currentDate = new Date();
 
-      
-        if (product.bestOffer && product.bestOffer.isListed) {
-            updatedPrice = updatedPrice - (updatedPrice * product.bestOffer.discountPercentage) / 100;
+        if (
+            product.bestOffer &&
+            product.bestOffer.isListed &&
+            product.bestOffer.startDate <= currentDate &&
+            product.bestOffer.endDate >= currentDate
+        ) {
+            if (product.bestOffer.discountType === 'percentage') {
+                const discountAmount = product.price * (product.bestOffer.discountValue / 100);
+                updatedPrice = Math.max(product.price - discountAmount, 0);
+            } else if (product.bestOffer.discountType === 'fixed') {
+                updatedPrice = Math.max(product.price - product.bestOffer.discountValue, 0);
+            }
         }
 
-     
+       
         item.price = updatedPrice;
 
-    
+       
         cart.totalPrice = cart.items.reduce((acc, item) => {
-            return acc + (item.price * item.quantity);
+            return acc + item.price * item.quantity;
         }, 0);
 
-      
+        
         await cart.save();
 
-        return res.status(200).json({ success: true, message: 'Quantity and price updated successfully', cart });
+        return res.status(200).json({
+            success: true,
+            message: 'Quantity and price updated successfully',
+            cart,
+        });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
 
 
 
@@ -467,10 +537,8 @@ const removeProductCart = async (req, res) => {
 const renderCheckOutPage = async (req, res) => {
     const userId = req.userId
     try {
+
         const cart = await cartModel.findOne({ user: userId }).populate('items.product')
-        
-        console.log(cart,'cc');
-        
         const address = await addressModel.find({ user: userId })
         const cartItems = cart ? cart.items : []
         
@@ -478,24 +546,13 @@ const renderCheckOutPage = async (req, res) => {
             return res.redirect('/user/cart')
         }
 
-        console.log(cart.totalPrice,'tt');
-        
-        // const deliveryCharge = cart.totalPrice > 1000 ? 0 : 40
-        let deliveryCharge
-        if(cart.totalPrice >= 1000){
-            deliveryCharge = 40
-        }
-
-        console.log(deliveryCharge,'ddd');
-        
         res.render('checkout', {
             cart,
             cartItems,
             address,
             user: userId,
             items: cart.items,
-            totalPrice: cart.totalPrice+deliveryCharge,
-            deliveryCharge
+            totalPrice: cart.totalPrice
         })
     } catch (error) {
         console.log(error)
@@ -505,7 +562,8 @@ const renderCheckOutPage = async (req, res) => {
 
 
 const placeOrder = async (req, res) => {
-    const { addressID, payment_option, code , deliveryCharge} = req.body;
+    let deliveryCharge = 0
+    const { addressID, payment_option, code } = req.body;
     const userId = req.userId;
 
     try {
@@ -556,15 +614,15 @@ const placeOrder = async (req, res) => {
 
         totalPrice = Math.max(totalPrice, 0);
         
-        // const deliveryCharge = totalPrice >= 1000 ? 0 : 40; 
-        // totalPrice += deliveryCharge;
-        const deliveryCharge = 40
-        if(totalPrice >= 1000){
-            totalPrice += deliveryCharge
-        }
-
         if(payment_option==='COD' && totalPrice>1000){
             return res.status(400).json({success:false,message: 'Cash on Delivery is not available for orders above ₹1000.'})
+        }
+        
+        if(totalPrice < 1500){
+            
+            deliveryCharge= 50
+            console.log(deliveryCharge,'ddd');
+            totalPrice+=deliveryCharge
         }
 
         const order = new orderModel({
@@ -628,7 +686,6 @@ const placeOrder = async (req, res) => {
             orderId: order._id,
             addressID,
             discountAmount,
-            deliveryCharge
         });
 
     } catch (error) {
@@ -684,6 +741,8 @@ const orderDetailedPage = async(req,res)=>{
     const id = req.params.id
     try {
         const orders = await orderModel.findById(id).populate('items.product')
+        console.log(orders,'ooo');
+        
         return res.render('userorderdetails',{orders})
     } catch (error) {
         console.log(error);
@@ -727,54 +786,97 @@ const cancelOrder = async (req, res) => {
 };
 
 
+// const returnOrder = async (req, res) => {
+//     const { orderId, itemId } = req.params
+//     const {reason} = req.body
+//     const userId = req.userId
+//     try {
+
+//         if(!reason){
+//             return res.status(400).json({ success: false, message: 'Reason for return is required' });
+//         }
+//         const order = await orderModel.findById(orderId).populate('items.product')
+//         const item = order.items.id(itemId)
+
+//         if (!item || item.status !== 'Delivered') {
+//             return res.status(400).json({ message: 'Item not eligible for return' })
+//         }
+//         item.status='Returned'
+        
+//         const product = item.product
+//         if(product.colors && product.colors[item.color]){
+//             product.colors[item.color].quantity += item.quantity
+//         }
+//         await product.save()
+
+//         if(order.paymentMethod === 'RazorPay'){
+//             const refundAmount = await handleRefund(order,item,userId)
+//             item.refundAmount = refundAmount
+//         }
+
+//         await order.save()
+//         res.json({ success: true, status: 'Returned', refundAmount: item.refundAmount });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Error returning item' });
+//     }
+
+// };
+
 const returnOrder = async (req, res) => {
-    const { orderId, itemId } = req.params
-    const userId = req.userId
+    const { orderId, itemId } = req.params;
+    const { reason } = req.body;
+    const userId = req.userId;
+
     try {
-        const order = await orderModel.findById(orderId).populate('items.product')
-        const item = order.items.id(itemId)
+        if (!reason) {
+            return res.status(400).json({ success: false, message: 'Reason for return is required' });
+        }
+
+        const order = await orderModel.findById(orderId).populate('items.product');
+        const item = order.items.id(itemId);
 
         if (!item || item.status !== 'Delivered') {
-            return res.status(400).json({ message: 'Item not eligible for return' })
-        }
-        item.status='Returned'
-        
-        const product = item.product
-        if(product.colors && product.colors[item.color]){
-            product.colors[item.color].quantity += item.quantity
-        }
-        await product.save()
-
-        if(order.paymentMethod === 'RazorPay'){
-            const refundAmount = await handleRefund(order,item,userId)
-            item.refundAmount = refundAmount
+            return res.status(400).json({ message: 'Item not eligible for return' });
         }
 
-        await order.save()
-        res.json({ success: true, status: 'Returned', refundAmount: item.refundAmount });
+        // Save the return reason and mark the item as "Returned"
+        item.returnReason = reason;
+        item.status = 'Returned';
+        item.adminApproval = false; // Admin has to approve the return
+
+        const product = item.product;
+        if (product.colors && product.colors[item.color]) {
+            product.colors[item.color].quantity += item.quantity;
+        }
+        await product.save();
+
+        // Razorpay refund logic remains the same but will be processed after admin approval
+        await order.save();
+
+        res.json({ success: true, status: 'Returned', message: 'Return initiated, pending admin approval' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error returning item' });
     }
-
 };
 
 
 const renderShop = async (req, res) => {
     try {
+        const currentDate = new Date();
+
+        
         const category = await categoryModel.find();
 
-      
+       
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
 
-       
         const totalProducts = await productModel.countDocuments({ isPublished: true });
-
-        
         const totalPages = Math.ceil(totalProducts / limit);
 
-     
+      
         const products = page > totalPages
             ? []
             : await productModel.find({ isPublished: true })
@@ -782,21 +884,48 @@ const renderShop = async (req, res) => {
                     path: 'category',
                     match: { isListed: true },
                 })
+                .populate('bestOffer')
                 .skip((page - 1) * limit)
                 .limit(limit);
 
-      
+        
+        const productsWithDiscounts = products.map(product => {
+            if (
+                product.bestOffer &&
+                product.bestOffer.isListed &&
+                product.bestOffer.endDate >= currentDate &&
+                product.bestOffer.startDate <= currentDate
+            ) {
+                let discountAmount = 0;
+
+                if (product.bestOffer.discountType === 'percentage') {
+                    discountAmount = product.price * (product.bestOffer.discountValue / 100);
+                } else if (product.bestOffer.discountType === 'fixed') {
+                    discountAmount = product.bestOffer.discountValue;
+                }
+
+                product.discountedPrice = Math.max(product.price - discountAmount, 0); 
+                product.offerLabel = `Save ${product.bestOffer.discountValue}${product.bestOffer.discountType === 'percentage' ? '%' : ''}`;
+            } else {
+                product.discountedPrice = product.price; 
+            }
+            return product;
+        });
+
+        
         res.render('shop', {
-            products,
+            products: productsWithDiscounts,
             category,
             totalPages,
             currentPage: page,
             totalProducts,
         });
     } catch (error) {
-        console.log(error);
+        console.error("Error rendering shop page:", error);
+        res.status(500).send("Error retrieving products for shop.");
     }
 };
+
 
 
 
@@ -1017,9 +1146,8 @@ const verifyRazorPay = async (req, res) => {
             if (!order) {
                 return res.status(404).json({ success: false, message: "Order not found" });
             }
-            // const deliveryCharge = order.deliveryCharge || 0; 
-            // const totalAmountWithDelivery = order.totalPrice + deliveryCharge;
 
+            
             order.paymentStatus = 'Paid';
             order.status = 'Confirmed';
 
@@ -1106,6 +1234,8 @@ const renderWishList = async(req,res)=>{
                 productId: product._id
             };
         }) : [];
+        
+    
         
         
         res.render('wishlist',{items,wishlist})

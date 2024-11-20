@@ -921,7 +921,8 @@
                                                         <%= details.country %>,<br>
                                                         <%= details.state %>,<br>
                                                         <%= details.city %>,<br>
-                                                        <%= details.pincode %>
+                                                        <%= details.pincode %><br>
+                                                        <%= details.landmark %>
                                                     </address>
                                                 </div>
                                             </div>
@@ -978,14 +979,22 @@
                                         </tr>
                     
                                         <tr class="summary-row">
-                                            <th>DeliveryCharge</th>
+                                            <th>Shipping</th>
                                             <td></td>
-                                            <td><%= deliveryCharge %></td>
+                                            <td><% if(totalPrice < 1500){ %>
+                                                 50
+                                                <%  }else{ %>
+                                                    Free Delivery
+                                              <%  } %></td>
                                         </tr>
                                         <tr class="summary-row total">
                                             <th>Total</th>
                                             <td></td>
-                                            <td class="product-subtotal"><span class="font-xl text-brand fw-900" id="totalPrice">₹<%= totalPrice %></span></td>
+                                            <td class="product-subtotal"><span class="font-xl text-brand fw-900" id="totalPrice">₹<% if(totalPrice < 1500){ %>
+                                                <%= totalPrice+50 %>
+                                           <% } else { %>
+                                            <%= totalPrice %>
+                                          <% }%></span></td>
                                         </tr>
                                     </tbody>
                                 </table>

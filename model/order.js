@@ -28,7 +28,16 @@ const orderItemSchema = new mongoose.Schema({
     refundAmount: {
         type: Number,
         default: 0 
+    },
+    returnReason: {
+        type: String,
+        default: null 
+    },
+    adminApproval: {
+        type: Boolean,
+        default: false 
     }
+
 });
 
 const orderSchema = new mongoose.Schema({
@@ -71,7 +80,7 @@ const orderSchema = new mongoose.Schema({
     },
     deliveryCharge: {
          type: Number, 
-         default: 40
+         default: 0
     }
     
 }, { timestamps: true });
