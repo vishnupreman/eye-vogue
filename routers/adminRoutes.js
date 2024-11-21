@@ -13,7 +13,7 @@ const { renderHome, renderProducts, renderBrands,
     renderSalesReportPage, downloadExcelSalesReport,downloadPdfSalesReport,
     adminSalesData, getBestSellingItems,approveReturn} = require('../controllers/admin.Controller')
 
-const upload = require('../middleware/upload')
+const upload = require('../middleware/upload') 
 router.route('/home').get(renderHome)
 
 // brands

@@ -112,6 +112,67 @@
     background-color: #066b5c;
 }
 
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 40%;
+    text-align: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #3399cc;
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #ccc;
+    color: #333;
+}
+
+
+  .toast {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    animation: fadeInOut 4s ease-in-out;
+  }
+  .toast.success { background-color: #4caf50; }
+  .toast.error { background-color: #f44336; }
+  .toast.warning { background-color: #ff9800; }
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(100%); }
+    10% { opacity: 1; transform: translateX(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(100%); }
+  }
+
+
+
     </style>
 </head>
 
@@ -1150,6 +1211,18 @@
             </div>
         </div>
     </div>
+
+    <div id="paymentFailureModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Payment Failed</h2>
+            <p>We're sorry, but your payment was not completed. You can retry the payment or contact support for help.</p>
+            <button id="retryPaymentButton" class="btn btn-primary">Retry Payment</button>
+            <button onclick="closeModalfail()" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+
+    <div id="toast-container" style="position: fixed; top: 10px; right: 10px; z-index: 1000;"></div>
+
     <!-- Vendor JS-->
     <script src="assets/js/vendor/modernizr-3.6.0.min.js"></script>
     <script src="assets/js/vendor/jquery-3.6.0.min.js"></script>
@@ -1174,6 +1247,8 @@
     <script src="assets/js/shop.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+
+   
     <script>
         window.onload = function () {
             const totalPriceText = document.getElementById('totalPrice').textContent.replace('₹', '').trim();
@@ -1236,85 +1311,81 @@ async function placeOrder() {
     validationMessage.style.display = 'none';
 
     // Handle Razorpay payment flow
-    if (paymentOption === 'RazorPay') {  // Razorpay option
-        try {
-        console.log(addressID,  paymentOption, code);
-        
-            const response = await fetch('http://localhost:3000/user/placeorder', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ addressID, payment_option: paymentOption, code})
-            });
-            
-            const result = await response.json();
-            console.log(result)
+    if (paymentOption === 'RazorPay') {
+    try {
+        const response = await fetch('http://localhost:3000/user/placeorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ addressID, payment_option: paymentOption, code })
+        });
 
-            if (result.success) {
+        const result = await response.json();
 
-                // 2. Initialize Razorpay options
-                const options = {
-                    key: "<%= process.env.RAZORPAY_KEY_ID %>", // Replace with Razorpay Key ID
-                    amount: result.amount,  // Amount in paise
-                    currency: "INR",
-                    name: "EyeVogue",
-                    description: "Order Payment",
-                    order_id: result.razorpay_order_id,
-                    handler: async function (response) {
-                        // 3. Verify payment on the backend
-                        const verifyResponse = await fetch('http://localhost:3000/user/verify-payment', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                                orderId:result.orderId,
-                                code:code,
-                            })
-                        });
+        if (result.success) {
+            const options = {
+                key: "<%= process.env.RAZORPAY_KEY_ID %>",
+                amount: result.amount,
+                currency: "INR",
+                name: "EyeVogue",
+                description: "Order Payment",
+                order_id: result.razorpay_order_id,
+                handler: async function (response) {
+                    const verifyResponse = await fetch('http://localhost:3000/user/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            orderId: result.orderId,
+                            code: code,
+                        })
+                    });
 
-                        const verifyResult = await verifyResponse.json();
+                    const verifyResult = await verifyResponse.json();
 
-                        if (verifyResult.success) {
-                            console.log(verifyResult.orderId);
-                            
-                            const id = verifyResult.orderId;
-                            window.location.href = `http://localhost:3000/user/orderconfirmed/${id}`;
-                        } else {
-                            validationMessage.style.display = 'block';
-                            validationMessage.textContent = 'Payment verification failed. Please try again.';
-                            validationMessage.scrollIntoView({ behavior: 'smooth' });
-                        }
-                    },
-                    prefill: {
-                        name: "<%= user.name %>",  // Optional: Autofill customer details
-                        email: "<%= user.email %>",
-                        contact: "<%= user.contact %>"
-                    },
-                    theme: {
-                        color: "#3399cc"
+                    if (verifyResult.success) {
+                        window.location.href = `http://localhost:3000/user/orderconfirmed/${verifyResult.orderId}`;
+                    } else {
+                        showFailureModal(result.orderId);
                     }
-                };
+                },
+                prefill: {
+                    name: "<%= user.name %>",
+                    email: "<%= user.email %>",
+                    contact: "<%= user.contact %>"
+                },
+                theme: { color: "#3399cc" },
+                modal: {
+                    ondismiss: async function () {
+                        console.warn('Payment modal closed by user.');
+                        await fetch('http://localhost:3000/user/payment-failed', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: result.orderId })
+                        });
+                        showFailureModal(result.orderId);
+                    }
+                }
+            };
 
-                // Open Razorpay checkout
-                const rzp = new Razorpay(options);
-                rzp.open();
-            } else {
-                validationMessage.style.display = 'block';
-                validationMessage.textContent = 'Failed to create payment order. Please try again.';
-                validationMessage.scrollIntoView({ behavior: 'smooth' });
-            }
-        } catch (error) {
-            console.error('Error with Razorpay payment:', error);
-            validationMessage.style.display = 'block';
-            validationMessage.textContent = 'Payment processing error. Please try again.';
-            validationMessage.scrollIntoView({ behavior: 'smooth' });
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            showValidationError('Failed to create payment order. Please try again.');
         }
-    } else {
+    } catch (error) {
+        console.error('Error with Razorpay payment:', error);
+        showValidationError('Payment processing error. Please try again.');
+    }
+
+    
+
+
+} 
+    else {
         // Handle COD order placement
         try {
             const response = await fetch('http://localhost:3000/user/placeorder', {
@@ -1341,6 +1412,127 @@ async function placeOrder() {
         }
     }
 }
+
+function showFailureModal(orderId) {
+    const failureModal = document.getElementById('paymentFailureModal');
+    const retryButton = document.getElementById('retryPaymentButton');
+
+    retryButton.onclick = function () {
+        retryPayment(orderId);
+    };
+
+    failureModal.style.display = 'block';
+}
+
+function retryPayment(orderId) {
+    fetch(`http://localhost:3000/user/retry-payment/${orderId}`, {
+        method: 'POST',
+    })
+        .then(response => response.json())
+        .then(result => {
+            console.log(result, 'res');
+
+            if (result.success) {
+                // Construct the Razorpay options object
+                const options = {
+                    key: '<%= process.env.RAZORPAY_KEY_ID %>', // Replace with actual Razorpay Key
+                    amount: result.amount, // Amount in paise
+                    currency: 'INR',
+                    name: 'EyeVogue',
+                    description: 'Order Payment',
+                    order_id: result.razorpay_order_id,
+                    
+                     // Razorpay order ID
+                    handler: async function (response) {
+                        console.log(response, 'response');
+
+                        // Verify payment on the server
+                        const verifyResponse = await fetch('http://localhost:3000/user/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: result.orderId,
+                                code:result.code,
+                            }),
+                        });
+
+                        const verifyResult = await verifyResponse.json();
+
+                        if (verifyResult.success) {
+                            window.location.href = `http://localhost:3000/user/orderconfirmed/${verifyResult.orderId}`;
+                        } else {
+                            showFailureModal(result.orderId);
+                        }
+                    },
+                    prefill: {
+                        name: '<%= user.name %>', // Replace with actual user name
+                        email: '<%= user.email %>', // Replace with actual user email
+                        contact: '<%= user.contact %>', // Replace with actual user contact
+                    },
+                    theme: { color: '#3399cc' },
+                    modal: {
+                        ondismiss: async function () {
+                        console.warn('Payment modal closed by user.');
+                        await fetch('http://localhost:3000/user/payment-failed', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: result.orderId })
+                        });
+                        showFailureModal(orderId);
+                    }
+                    },
+                };
+
+                // Initialize Razorpay with the constructed options
+                const rzp = new Razorpay(options);
+                rzp.open();
+                showToast('Retrying payment. Please complete the payment in the Razorpay window.', 'success');
+            } else {
+                showToast('Unable to retry payment. Please contact support.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error retrying payment:', error);
+            showToast('Error occurred while retrying payment. Please try again.', 'error');
+        });
+}
+
+
+
+function showToast(message, type = 'success') {
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        // Create the toast container if it doesn't exist
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.top = '10px';
+        toastContainer.style.right = '10px';
+        toastContainer.style.zIndex = '1000';
+        document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerText = message;
+
+    toastContainer.appendChild(toast);
+
+    // Remove the toast after 4 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
+}
+
+    function closeModalfail() {
+        console.log('hiiii');
+        
+            const failureModal = document.getElementById('paymentFailureModal');
+            failureModal.style.display = 'none';
+        }
 
     </script>
     <script>

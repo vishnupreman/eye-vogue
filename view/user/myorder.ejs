@@ -340,6 +340,7 @@
                                                             <th>Product Name</th>
                                                             <th>Product Image</th>
                                                             <th>Status</th>
+                                                            
                                                             <th>Price</th>
                                                             <th>Quantity</th>
                                                             <th>Date</th>
@@ -368,7 +369,9 @@
                                                                             <%= item.status || order.status %>
                                                                         </span>
                                                                     </td>
-                                                    
+                                                                    
+                                                                    
+
                                                                     <td>Rs.<%= item.price.toFixed(2) %></td>
                                                     
                                                                     <td><%= item.quantity %></td>
@@ -380,7 +383,17 @@
                                                                     </td>
                                                                 </tr>
                                                             <% }) %>
+                                                        
                                                             <!-- Row for displaying total price of each order -->
+                                                             <th>PaymentStatus</th>
+                                                             <td>
+                                                                <%= order.paymentStatus %>
+                                                                <% if (order.paymentStatus === 'Pending') { %>
+                                                                    <button onclick="retryPayment('<%= order._id %>')" class="btn btn-warning">Retry Payment</button>
+                                                                <% } %>
+
+                                                            </td>
+                                                            
                                                             <tr>
                                                                 <td colspan="5" style="text-align: right;"><strong>Total Price:</strong></td>
                                                                 <td colspan="2">Rs.<%= order.totalPrice.toFixed(2) %></td>
@@ -685,6 +698,8 @@
     <script src="assets/js/plugins/jquery.theia.sticky.js"></script>
     <!-- Template  JS -->
     <script src="assets/js/main.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <script>
         let actionUrl = '';
     
@@ -757,7 +772,86 @@
         }
     </script>
     
-    
+    <script>
+        
+        function retryPayment(orderId) {
+    fetch(`http://localhost:3000/user/retry-payment/${orderId}`, {
+        method: 'POST',
+    })
+        .then(response => response.json())
+        .then(result => {
+            console.log(result, 'res');
+
+            if (result.success) {
+                console.log('hiii');
+                
+                // Construct the Razorpay options object
+                const options = {
+                    key: '<%= process.env.RAZORPAY_KEY_ID %>', // Replace with actual Razorpay Key
+                    amount: result.amount, // Amount in paise
+                    currency: 'INR',
+                    name: 'EyeVogue',
+                    description: 'Order Payment',
+                    order_id: result.razorpay_order_id,
+                    
+                     // Razorpay order ID
+                    handler: async function (response) {
+                        console.log(response, 'response');
+
+                        // Verify payment on the server
+                        const verifyResponse = await fetch('http://localhost:3000/user/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: result.orderId,
+                                code:result.code,
+                            }),
+                        });
+
+                        const verifyResult = await verifyResponse.json();
+
+                        if (verifyResult.success) {
+                            window.location.href = `http://localhost:3000/user/orderconfirmed/${verifyResult.orderId}`;
+                        } else {
+                            showFailureModal(result.orderId);
+                        }
+                    },
+                    prefill: {
+                        name: '<%#= user.name %>', // Replace with actual user name
+                        email: '<%#= user.email %>', // Replace with actual user email
+                        contact: '<%#= user.contact %>', // Replace with actual user contact
+                    },
+                    theme: { color: '#3399cc' },
+                    modal: {
+                        ondismiss: async function () {
+                        console.warn('Payment modal closed by user.');
+                        await fetch('http://localhost:3000/user/payment-failed', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: result.orderId })
+                        });
+                        showFailureModal(orderId);
+                    }
+                    },
+                };
+
+                // Initialize Razorpay with the constructed options
+                const rzp = new Razorpay(options);
+                rzp.open();
+                showToast('Retrying payment. Please complete the payment in the Razorpay window.', 'success');
+            } else {
+                showToast('Unable to retry payment. Please contact support.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error retrying payment:', error);
+            showToast('Error occurred while retrying payment. Please try again.', 'error');
+        });
+}
+    </script>
     
     
 

@@ -8,7 +8,8 @@ const { renderHome, renderProductPage, renderMyAccount, editUserName, renderEdit
     renderShop,filterShop,showCoupons,applyCoupon,removeCoupon,
     verifyRazorPay,renderWishList,addToWishList,removeFromWishList,orderDetailedPage,
     renderWalletPage,
-    downloadInvoice} = require('../controllers/user.controller')
+    downloadInvoice,
+    retryPayment} = require('../controllers/user.controller')
 
 router.route('/home').get(renderHome)
 
@@ -38,6 +39,7 @@ router.route('/checkout').get(renderCheckOutPage)
 router.route('/placeorder').post(placeOrder)
 router.route('/orderconfirmed/:id').get(renderOrderConfrimPage)
 router.route('/verify-payment').post(verifyRazorPay)
+router.route('/retry-payment/:orderId').post(retryPayment)
 
 ///orderpage
 router.route('/myorder').get(renderOrderPage)

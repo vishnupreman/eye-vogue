@@ -1071,20 +1071,50 @@ const downloadPdfSalesReport = async (req, res) => {
         }
 
         const orders = await orderModel.find(filter);
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({ margin: 30 });
 
-        doc.fontSize(16).text('Sales Report', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(12).text('Order ID | Date | Discount | Amount | Payment Method');
-        doc.moveDown();
+       
+        doc.fontSize(18).text('Sales Report', { align: 'center', underline: true });
+        doc.moveDown(0.5);
+        if (startDate && endDate) {
+            doc.fontSize(12).text(`Date Range: ${startDate} to ${endDate}`, { align: 'center' });
+        }
+        if (timeFilter) {
+            doc.fontSize(12).text(`Time Filter: ${timeFilter}`, { align: 'center' });
+        }
+        doc.moveDown(1);
 
+        
+        doc.fontSize(10).text('Order ID', 50, doc.y, { width: 100, continued: true })
+            .text('Date', 150, doc.y, { width: 100, continued: true })
+            .text('Discount', 250, doc.y, { width: 80, continued: true, align: 'right' })
+            .text('Amount', 330, doc.y, { width: 80, continued: true, align: 'right' })
+            .text('Payment Method', 410, doc.y, { width: 120, align: 'right' });
+        doc.moveDown(0.5);
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+
+       
         orders.forEach(order => {
             const orderDate = new Date(order.createdAt);
             const formattedDate = orderDate instanceof Date && !isNaN(orderDate) ? orderDate.toLocaleDateString() : 'Invalid Date';
 
-            doc.text(`${order._id}  | ${formattedDate} | Rs.${order.discount.toFixed(2)} | Rs.${order.totalPrice.toFixed(2)} | ${order.paymentMethod}`);
-            doc.moveDown();
+            doc.text(order._id, 50, doc.y, { width: 100, continued: true })
+                .text(formattedDate, 150, doc.y, { width: 100, continued: true })
+                .text(`Rs.${order.discount.toFixed(2)}`, 250, doc.y, { width: 80, continued: true, align: 'right' })
+                .text(`Rs.${order.totalPrice.toFixed(2)}`, 330, doc.y, { width: 80, continued: true, align: 'right' })
+                .text(order.paymentMethod, 410, doc.y, { width: 120, align: 'right' });
+            doc.moveDown(0.5);
         });
+
+        doc.moveDown(2);
+        doc.fontSize(10).text('Thank you for using our services.', { align: 'center', italic: true });
+
+        
+        const range = doc.bufferedPageRange(); 
+        for (let i = 0; i < range.count; i++) {
+            doc.switchToPage(i);
+            doc.text(`Page ${i + 1} of ${range.count}`, 0, 750, { align: 'center' });
+        }
 
         res.setHeader('Content-Disposition', 'attachment; filename=salesreport.pdf');
         res.setHeader('Content-Type', 'application/pdf');
@@ -1092,9 +1122,10 @@ const downloadPdfSalesReport = async (req, res) => {
         doc.end();
     } catch (error) {
         console.error('Error downloading PDF sales report:', error);
-       
+        res.status(500).send('Error generating PDF report');
     }
-}
+};
+
 
 const adminSalesData = async(req,res)=>{
     const { filter, startDate, endDate } = req.query;
@@ -1139,13 +1170,13 @@ const adminSalesData = async(req,res)=>{
 
 const getBestSellingItems = async (req, res) => {
     try {
-        const { type } = req.query; // Determine aggregation type
+        const { type } = req.query;
 console.log(type)
         let groupByField, lookupCollection, localField, foreignField, projectFields;
 
         if (type === 'products') {
             groupByField = '$items.product';
-            lookupCollection = 'productmodels'; // Correct collection for products
+            lookupCollection = 'productmodels'; 
             localField = '_id';
             foreignField = '_id';
             projectFields = {
@@ -1156,7 +1187,7 @@ console.log(type)
             };
         } else if (type === 'categories') {
             groupByField = '$productDetails.category';
-            lookupCollection = 'categories'; // Correct collection for categories
+            lookupCollection = 'categories'; 
             localField = '_id';
             foreignField = '_id';
             projectFields = {
@@ -1167,7 +1198,7 @@ console.log(type)
             };
         } else if (type === 'brands') {
             groupByField = '$productDetails.brandname';
-            lookupCollection = 'brands'; // Correct collection for brands
+            lookupCollection = 'brands';
             localField = '_id';
             foreignField = '_id';
             projectFields = {
@@ -1180,15 +1211,15 @@ console.log(type)
             return res.status(400).json({ success: false, message: "Invalid type parameter" });
         }
 
-        // Aggregation pipeline
+       
         const aggregationPipeline = [
-            { $unwind: '$items' }, // Unwind items array
+            { $unwind: '$items' },
             {
                 
                     $lookup: {
-                        from: 'productmodels', // Collection name
-                        localField: 'items.product', // Field in orderModel
-                        foreignField: '_id', // Field in productmodels
+                        from: 'productmodels', 
+                        localField: 'items.product', 
+                        foreignField: '_id', 
                         as: 'productDetails',
                     },
                 
@@ -1201,12 +1232,12 @@ console.log(type)
             },
             {
                 $group: {
-                    _id: groupByField, // Group by dynamic field
-                    totalQuantity: { $sum: '$items.quantity' }, // Sum the quantities
+                    _id: groupByField, 
+                    totalQuantity: { $sum: '$items.quantity' },
                 },
             },
-            { $sort: { totalQuantity: -1 } }, // Sort by total quantity (descending)
-            { $limit: 10 }, // Limit to top 10 results
+            { $sort: { totalQuantity: -1 } }, 
+            { $limit: 10 },
         ];
 
     
@@ -1214,13 +1245,13 @@ console.log(type)
             aggregationPipeline.push(
                 {
                     $lookup: {
-                        from: lookupCollection, // Dynamic collection
-                        localField: '_id', // Dynamic local field
-                        foreignField: '_id', // Dynamic foreign field
+                        from: lookupCollection, 
+                        localField: '_id', 
+                        foreignField: '_id', 
                         as: `${type}Details`,
                     },
                 },
-                { $unwind: `$${type}Details` } // Unwind the result
+                { $unwind: `$${type}Details` } 
             );
         
 
@@ -1234,7 +1265,7 @@ console.log(type)
             },
         });
 
-        // Execute aggregation
+       
         const bestSellingItems = await orderModel.aggregate(aggregationPipeline);
 console.log(bestSellingItems)
         return res.status(200).json({ success: true, data: bestSellingItems });

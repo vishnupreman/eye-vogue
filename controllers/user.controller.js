@@ -371,24 +371,24 @@ const renderCartPage = async (req, res) => {
     const userId = req.userId;
 
     try {
-        // Fetch the cart and populate product details
+        
         const cart = await cartModel.findOne({ user: userId }).populate('items.product');
 
-        // Ensure we have cart items
+    
         const cartItems = cart ? cart.items : [];
 
         const currentDate = new Date();
 
-        // Loop through cart items to update prices dynamically
+    
         for (let item of cartItems) {
             const product = item.product;
 
-            // Ensure the product exists (handles deleted products)
+            
             if (!product) continue;
 
-            let updatedPrice = product.price; // Default to original price
+            let updatedPrice = product.price; 
 
-            // Check if a valid offer applies to the product
+        
             if (
                 product.bestOffer &&
                 product.bestOffer.isListed &&
@@ -403,14 +403,14 @@ const renderCartPage = async (req, res) => {
                 }
             }
 
-            // Update the item's price dynamically
+            
             item.price = updatedPrice;
         }
 
-        // Recalculate the total price of the cart
+       
         const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
-        // Pass updated cart and cart items to the view
+       
         res.render('cart', { cart, cartItems, totalPrice });
     } catch (error) {
         console.error('Error rendering cart page:', error);
@@ -666,18 +666,38 @@ const placeOrder = async (req, res) => {
                     currency: 'INR',
                     receipt: `receipt_order_${Date.now()}`,
                 });
+        
+                
+                order.razorpayOrderId = razorpayOrder.id;
+                await order.save();
+        
+                order.status = 'Pending';
+               
 
+                await order.save();
+                console.log('failed');
+                
+                
+            
+    
+                cart.items = [];
+                cart.totalPrice = 0;
+                await cart.save()
                 return res.json({
                     success: true,
                     orderId: order._id,
                     razorpay_order_id: razorpayOrder.id,
                     amount: razorpayOrder.amount,
-                    code:code
+                    code: code,
                 });
+             
             } catch (error) {
                 console.error("Error creating Razorpay order:", error);
-                await order.remove();
-                return res.status(500).json({ success: false, message: "Failed to create Razorpay order" });
+                return res.status(500).json({
+                    success: false,
+                    message: "Payment failed. Order saved with payment status 'Failed'.",
+                    orderId: order._id, 
+                });
             }
         }
 
@@ -689,12 +709,49 @@ const placeOrder = async (req, res) => {
         });
 
     } catch (error) {
+        
         console.error(error);
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
 
 
+
+const retryPayment = async (req, res) => {
+    const { orderId } = req.params;
+    console.log(orderId)
+    try {
+        const order = await orderModel.findById(orderId);
+        if (!order || order.paymentStatus !== 'Pending') {
+            return res.status(400).json({ success: false, message: 'Invalid order for retry payment.' });
+        }
+
+      
+        let couponCode = order.coupon; 
+
+
+    
+        const razorpayOrder = await razorpay.orders.create({
+            amount: order.totalPrice * 100, 
+            currency: 'INR',
+            receipt: `receipt_retry_${Date.now()}`,
+        });
+
+        order.razorpayOrderId = razorpayOrder.id;
+        await order.save();
+        console.log(couponCode)
+        res.json({
+            success: true,
+            razorpay_order_id: razorpayOrder.id,
+            amount: razorpayOrder.amount,
+            code: couponCode, 
+            orderId
+        });
+    } catch (error) {
+        console.error('Error retrying payment:', error);
+        res.status(500).json({ success: false, message: 'Failed to retry payment' });
+    }
+};
 
 
 
@@ -786,42 +843,7 @@ const cancelOrder = async (req, res) => {
 };
 
 
-// const returnOrder = async (req, res) => {
-//     const { orderId, itemId } = req.params
-//     const {reason} = req.body
-//     const userId = req.userId
-//     try {
 
-//         if(!reason){
-//             return res.status(400).json({ success: false, message: 'Reason for return is required' });
-//         }
-//         const order = await orderModel.findById(orderId).populate('items.product')
-//         const item = order.items.id(itemId)
-
-//         if (!item || item.status !== 'Delivered') {
-//             return res.status(400).json({ message: 'Item not eligible for return' })
-//         }
-//         item.status='Returned'
-        
-//         const product = item.product
-//         if(product.colors && product.colors[item.color]){
-//             product.colors[item.color].quantity += item.quantity
-//         }
-//         await product.save()
-
-//         if(order.paymentMethod === 'RazorPay'){
-//             const refundAmount = await handleRefund(order,item,userId)
-//             item.refundAmount = refundAmount
-//         }
-
-//         await order.save()
-//         res.json({ success: true, status: 'Returned', refundAmount: item.refundAmount });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Error returning item' });
-//     }
-
-// };
 
 const returnOrder = async (req, res) => {
     const { orderId, itemId } = req.params;
@@ -840,10 +862,10 @@ const returnOrder = async (req, res) => {
             return res.status(400).json({ message: 'Item not eligible for return' });
         }
 
-        // Save the return reason and mark the item as "Returned"
+        
         item.returnReason = reason;
         item.status = 'Returned';
-        item.adminApproval = false; // Admin has to approve the return
+        item.adminApproval = false; 
 
         const product = item.product;
         if (product.colors && product.colors[item.color]) {
@@ -851,7 +873,7 @@ const returnOrder = async (req, res) => {
         }
         await product.save();
 
-        // Razorpay refund logic remains the same but will be processed after admin approval
+      
         await order.save();
 
         res.json({ success: true, status: 'Returned', message: 'Return initiated, pending admin approval' });
@@ -1147,7 +1169,8 @@ const verifyRazorPay = async (req, res) => {
                 return res.status(404).json({ success: false, message: "Order not found" });
             }
 
-            
+            console.log('lskdjfsdlkfj')
+            console.log(orderId)
             order.paymentStatus = 'Paid';
             order.status = 'Confirmed';
 
@@ -1234,9 +1257,6 @@ const renderWishList = async(req,res)=>{
                 productId: product._id
             };
         }) : [];
-        
-    
-        
         
         res.render('wishlist',{items,wishlist})
     } catch (error) {
@@ -1342,46 +1362,70 @@ const renderWalletPage = async(req,res)=>{
     }
 }
 
-const downloadInvoice = async(req,res)=>{
-    const {id} = req.params
+const downloadInvoice = async (req, res) => {
+    const { id } = req.params;
     try {
-        const order = await orderModel.findById(id).populate('items.product')
-        if(!order){
-            return res.status(404).send('Order not found')
+        const order = await orderModel.findById(id).populate('items.product');
+        if (!order) {
+            return res.status(404).send('Order not found');
         }
-        const doc = new PDFDocument()
 
-        const filePath = path.join(__dirname,'\downloads')
-        const writeStream = fs.createWriteStream(filePath)
-        doc.pipe(writeStream)
+     
+        const doc = new PDFDocument({ margin: 30 });
 
-        doc.fontSize(20).text('Invoice', { align: 'center' });
+        
+        const filePath = path.join(__dirname,'\downloads');
+        const writeStream = fs.createWriteStream(filePath);
+        doc.pipe(writeStream);
+
+   
+        doc
+            .fontSize(16)
+            .text('Eye Vogue', 120, 20)
+            .fontSize(10)
+            .text('Edapally', { continued: true })
+            .text('Kochi, Kerala, 217231')
+            .text('Phone: +89893927433')
+            .text('Email: support@eyevogue.com');
+
         doc.moveDown();
 
-        doc.fontSize(14).text(`Order ID: ${order._id}`);
-        doc.text(`User: ${order.user}`);
-        doc.text(`Payment Method: ${order.paymentMethod}`);
-        doc.text(`Total Price: Rs.${order.totalPrice.toFixed(2)}`);
+       
+        doc.fontSize(12).text(`Order Number: ${order._id}`);
+        doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
+        doc.text(`Customer: ${order.billingAddress.name}`);
+        doc.text(`Address: ${order.billingAddress.address}, ${order.billingAddress.city}, ${order.billingAddress.state}, ${order.billingAddress.country} - ${order.billingAddress.pincode}`);
         doc.moveDown();
 
-        doc.text('Billing Address:');
-        const { billingAddress } = order;
-        doc.text(`${billingAddress.name},`);
-        doc.text(`${billingAddress.address}, ${billingAddress.city},`);
-        doc.text(`${billingAddress.state}, ${billingAddress.country} - ${billingAddress.pincode}`);
-        doc.moveDown();
+        
+        doc.fontSize(12).text('Product', 50, 180, { width: 200, align: 'left' })
+            .text('Quantity', 250, 180, { width: 100, align: 'center' })
+            .text('Price', 350, 180, { width: 100, align: 'center' })
+            .text('Total', 450, 180, { width: 100, align: 'center' });
+        doc.moveTo(50, 200).lineTo(550, 200).stroke();
 
-
-        doc.text('Items:');
-        order.items.forEach((item, index) => {
+        
+        let yPosition = 210;
+        order.items.forEach((item) => {
             const productName = item.product ? item.product.name : 'Product not found';
-            doc.text(
-                `${index + 1}. ${productName} - Rs.${item.price.toFixed(2)} x ${item.quantity} = Rs.${(
-                    item.price * item.quantity
-                ).toFixed(2)}`
-            );
+            doc.fontSize(10)
+                .text(productName, 50, yPosition, { width: 200, align: 'left' })
+                .text(item.quantity, 250, yPosition, { width: 100, align: 'center' })
+                .text(`Rs ${item.price.toFixed(2)}`, 350, yPosition, { width: 100, align: 'center' })
+                .text(`Rs ${(item.price * item.quantity).toFixed(2)}`, 450, yPosition, { width: 100, align: 'center' });
+            yPosition += 20;
         });
 
+      
+        doc.moveDown();
+        doc.text(`Subtotal: Rs ${order.totalPrice.toFixed(2)}`, 400, yPosition + 20, { align: 'right' });
+        doc.text(`Discount: Rs ${order.discount ? order.discount.toFixed(2) : '0.00'}`, 400, yPosition + 40, { align: 'right' });
+        doc.text(`Total: Rs ${(order.totalPrice - (order.discount || 0)).toFixed(2)}`, 400, yPosition + 60, { align: 'right' });
+
+    
+        doc.moveDown().text('Thanks for purchasing from eyevogue', 50, yPosition + 100, { align: 'center' });
+
+       
         doc.end();
 
         writeStream.on('finish', () => {
@@ -1389,8 +1433,7 @@ const downloadInvoice = async(req,res)=>{
                 if (err) {
                     console.error('Error downloading the invoice:', err);
                 }
-                
-                fs.unlinkSync(filePath);
+                fs.unlinkSync(filePath); 
             });
         });
 
@@ -1400,8 +1443,9 @@ const downloadInvoice = async(req,res)=>{
         });
     } catch (error) {
         console.error('Error fetching order or generating invoice:', error);
+        res.status(500).send('Internal server error.');
     }
-}
+};
 
 
 
@@ -1439,6 +1483,7 @@ module.exports = {
     removeFromWishList,
     orderDetailedPage,
     renderWalletPage,
-    downloadInvoice
+    downloadInvoice,
+    retryPayment
 }
 
