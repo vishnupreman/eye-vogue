@@ -775,7 +775,7 @@
     <script>
         
         function retryPayment(orderId) {
-    fetch(`http://localhost:3000/user/retry-payment/${orderId}`, {
+    fetch(`/user/retry-payment/${orderId}`, {
         method: 'POST',
     })
         .then(response => response.json())
@@ -799,7 +799,7 @@
                         console.log(response, 'response');
 
                         // Verify payment on the server
-                        const verifyResponse = await fetch('http://localhost:3000/user/verify-payment', {
+                        const verifyResponse = await fetch('/user/verify-payment', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -814,7 +814,7 @@
                         const verifyResult = await verifyResponse.json();
 
                         if (verifyResult.success) {
-                            window.location.href = `http://localhost:3000/user/orderconfirmed/${verifyResult.orderId}`;
+                            window.location.href = `/user/orderconfirmed/${verifyResult.orderId}`;
                         } else {
                             showFailureModal(result.orderId);
                         }
@@ -828,7 +828,7 @@
                     modal: {
                         ondismiss: async function () {
                         console.warn('Payment modal closed by user.');
-                        await fetch('http://localhost:3000/user/payment-failed', {
+                        await fetch('/user/payment-failed', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ orderId: result.orderId })

@@ -694,7 +694,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <a href="http://localhost:3000/user/checkout" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
+                                    <a href="/user/checkout" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
                                 </div>
                             </div>
                         </div>
@@ -885,7 +885,7 @@
 
 
     function updateCartQuantity(productId, color, size, newQuantity) {
-    fetch('http://localhost:3000/user/cart/updatequantity', {
+    fetch('/user/cart/updatequantity', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -913,7 +913,7 @@
 
 
 function removeItem(productId) {
-    fetch('http://localhost:3000/user/cart/removeitem', {
+    fetch('/user/cart/removeitem', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -967,7 +967,7 @@ function qtydown(productId, color) {
     }
 }
 function updateCartQuantity(productId, color, newQuantity) {
-    fetch('http://localhost:3000/user/cart/updatequantity', {
+    fetch('/user/cart/updatequantity', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -998,7 +998,7 @@ function updateCartQuantity(productId, color, newQuantity) {
 }
 
 function removeItem(productId) {
-    fetch('http://localhost:3000/user/cart/removeitem', {
+    fetch('/user/cart/removeitem', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

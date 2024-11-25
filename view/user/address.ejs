@@ -665,7 +665,7 @@
         confirmDeleteBtn.on('click', function () {
           if (addressIdToDelete) {
             $.ajax({
-              url: 'http://localhost:3000/user/deleteaddress/' + addressIdToDelete, // Dynamically populate the addressId
+              url: '/user/deleteaddress/' + addressIdToDelete, // Dynamically populate the addressId
               type: 'DELETE',
               success: function (result) {
                 window.location.reload(); // Reload the page to reflect the deletion

@@ -180,7 +180,7 @@
         generateOTP.disabled = true;
 
         // const token = localStorage.getItem('token');
-        const url = "http://localhost:3000/auth/signup/otp";
+        const url = "/auth/signup/otp";
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -220,7 +220,7 @@
         verifyButton.disabled = true;
 
         // const token = localStorage.getItem('token'); // Include the token in the verification
-        const url = "http://localhost:3000/auth/signup/otp/verify";
+        const url = "/auth/signup/otp/verify";
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -233,7 +233,7 @@
         const data = await response.json();
         if (data.success) {
           console.log("OTP verification successful");
-          window.location.href = 'http://localhost:3000/auth/login';
+          window.location.href = '/auth/login';
         } else {
           console.log("OTP verification failed");
           errorMessage.textContent = 'OTP verification failed';
