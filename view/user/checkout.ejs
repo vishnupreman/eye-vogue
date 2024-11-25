@@ -1038,7 +1038,7 @@
                                             <td></td>
                                             <td id="couponAmount">₹<%= cart.couponAmount %></td>
                                         </tr>
-                    
+
                                         <tr class="summary-row">
                                             <th>Shipping</th>
                                             <td></td>
@@ -1047,6 +1047,12 @@
                                                 <%  }else{ %>
                                                     Free Delivery
                                               <%  } %></td>
+                                        </tr>
+
+                                        <tr class="summary-row">
+                                            <th>GST</th>
+                                            <td></td>
+                                            <td>₹<%= gstAmount.toFixed(2) %></td>
                                         </tr>
                                         <tr class="summary-row total">
                                             <th>Total</th>

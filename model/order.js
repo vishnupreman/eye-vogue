@@ -81,6 +81,10 @@ const orderSchema = new mongoose.Schema({
     deliveryCharge: {
          type: Number, 
          default: 0
+    },
+    gstAmount: {
+        type: Number,
+        default: 0,
     }
     
 }, { timestamps: true });

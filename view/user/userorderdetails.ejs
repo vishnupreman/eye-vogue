@@ -147,9 +147,11 @@
         <div class="order-info-item">
             <h2>Order Summary</h2>
             <p>
-                Total:<%= orders.totalPrice %><br>
+                
+                GST:<%= orders.gstAmount %><br>
                 Discount:<%= orders.discount %><br>
-                Delivery Charge:<%= orders.deliveryCharge %>
+                Delivery Charge:<%= orders.deliveryCharge %><br>
+                OrderTotal:<%= orders.totalPrice %><br>
                 
             </p>
         </div>

@@ -290,13 +290,28 @@
            
 
             <h3>Best-Selling Products</h3>
-<canvas id="best-selling-products-chart"></canvas>
-
-<h3>Best-Selling Categories</h3>
-<canvas id="best-selling-categories-chart"></canvas>
-
-<h3>Best-Selling Brands</h3>
-<canvas id="best-selling-brands-chart"></canvas>
+            <select id="filter-products" class="time-filter">
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="365">Last Year</option>
+            </select>
+            <canvas id="best-selling-products-chart"></canvas>
+            
+            <h3>Best-Selling Categories</h3>
+            <select id="filter-categories" class="time-filter">
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="365">Last Year</option>
+            </select>
+            <canvas id="best-selling-categories-chart"></canvas>
+            
+            <h3>Best-Selling Brands</h3>
+            <select id="filter-brands" class="time-filter">
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="365">Last Year</option>
+            </select>
+            <canvas id="best-selling-brands-chart"></canvas>
 
             
             
@@ -475,12 +490,18 @@
         fetchAndRenderChart('yearly');
     </script>
 
-    <script>
- $(document).ready(function () {
+<script>
+    $(document).ready(function () {
+    // Store chart instances
+    const chartInstances = {};
+
     // Generic function to fetch and render data for a Chart.js chart
     function fetchBestSellingChartData(type, canvasSelector) {
+        const dateFilter = $('#date-filter').val(); // Get the selected filter value
+        const queryString = dateFilter ? `?type=${type}&dateFilter=${dateFilter}` : `?type=${type}`; // Add dateFilter to the query if selected
+
         $.ajax({
-            url: `/admin/home/best-selling?type=${type}`,
+            url: `/admin/home/best-selling${queryString}`,
             method: 'GET',
             success: function (response) {
                 if (response.success) {
@@ -503,7 +524,14 @@
     // Function to render a Chart.js chart
     function renderChart(canvasSelector, labels, data, title) {
         const ctx = $(canvasSelector)[0].getContext('2d');
-        new Chart(ctx, {
+
+        // Destroy existing chart if it exists
+        if (chartInstances[canvasSelector]) {
+            chartInstances[canvasSelector].destroy();
+        }
+
+        // Create a new chart and store the instance
+        chartInstances[canvasSelector] = new Chart(ctx, {
             type: 'bar', // Change to 'pie' or 'doughnut' if needed
             data: {
                 labels: labels,
@@ -550,12 +578,22 @@
     }
 
     // Initialize charts for products, categories, and brands
-    fetchBestSellingChartData('products', '#best-selling-products-chart');
-    fetchBestSellingChartData('categories', '#best-selling-categories-chart');
-    fetchBestSellingChartData('brands', '#best-selling-brands-chart');
+    function refreshCharts() {
+        fetchBestSellingChartData('products', '#best-selling-products-chart');
+        fetchBestSellingChartData('categories', '#best-selling-categories-chart');
+        fetchBestSellingChartData('brands', '#best-selling-brands-chart');
+    }
+
+    // Refresh charts when the date filter is changed
+    $('#date-filter').on('change', function () {
+        refreshCharts();
+    });
+
+    // Initial chart loading
+    refreshCharts();
 });
 
-    </script>
+</script>
 
 </body>
 

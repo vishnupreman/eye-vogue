@@ -546,13 +546,20 @@ const renderCheckOutPage = async (req, res) => {
             return res.redirect('/user/cart')
         }
 
+        let totalPrice = cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+        const gstRate = 0.18;
+        const gstAmount = totalPrice * gstRate
+
+        
         res.render('checkout', {
             cart,
             cartItems,
             address,
             user: userId,
+            gstAmount,
             items: cart.items,
-            totalPrice: cart.totalPrice
+            totalPrice: cart.totalPrice + gstAmount
         })
     } catch (error) {
         console.log(error)
@@ -611,7 +618,9 @@ const placeOrder = async (req, res) => {
 
             totalPrice -= discountAmount;
         }
-
+        const gstRate = 0.18
+        const gstAmount = totalPrice*gstRate
+        totalPrice = totalPrice+gstAmount
         totalPrice = Math.max(totalPrice, 0);
         
         if(payment_option==='COD' && totalPrice>1000){
@@ -629,6 +638,7 @@ const placeOrder = async (req, res) => {
             user: userId,
             items: cart.items,
             totalPrice,
+            gstAmount,
             billingAddress: address,
             paymentMethod: payment_option,
             status: payment_option === 'RazorPay' ? 'Pending' : 'Confirmed',
@@ -1349,7 +1359,10 @@ const removeFromWishList = async (req, res) => {
 const renderWalletPage = async(req,res)=>{
     try {
         const userId = req.userId
-        const wallet = await walletModel.findOne({user:userId}).populate('transactions')
+        const wallet = await walletModel.findOne({user:userId}).populate({
+            path:'transactions',
+            options:{ sort: { date: -1 } }
+        })
         if (!wallet) {
             return res.status(404).json({ message: 'Wallet not found for user' });
         }
@@ -1370,62 +1383,122 @@ const downloadInvoice = async (req, res) => {
             return res.status(404).send('Order not found');
         }
 
-     
         const doc = new PDFDocument({ margin: 30 });
 
         
-        const filePath = path.join(__dirname,'\downloads');
+        const filePath = path.join(__dirname, '\downloads', );
         const writeStream = fs.createWriteStream(filePath);
         doc.pipe(writeStream);
 
    
         doc
-            .fontSize(16)
-            .text('Eye Vogue', 120, 20)
+            .fontSize(20)
+            .font('Helvetica-Bold')
+            .text('Eye Vogue', { align: 'center' })
+            .moveDown(0.5)
             .fontSize(10)
-            .text('Edapally', { continued: true })
-            .text('Kochi, Kerala, 217231')
-            .text('Phone: +89893927433')
-            .text('Email: support@eyevogue.com');
+            .font('Helvetica')
+            .text('Edapally, Kochi, Kerala, 217231', { align: 'center' })
+            .text('Phone: +91 89893927433 | Email: support@eyevogue.com', { align: 'center' });
 
-        doc.moveDown();
+        doc.moveDown(1.5);
 
        
-        doc.fontSize(12).text(`Order Number: ${order._id}`);
-        doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-        doc.text(`Customer: ${order.billingAddress.name}`);
-        doc.text(`Address: ${order.billingAddress.address}, ${order.billingAddress.city}, ${order.billingAddress.state}, ${order.billingAddress.country} - ${order.billingAddress.pincode}`);
-        doc.moveDown();
+        doc
+            .fontSize(12)
+            .font('Helvetica-Bold')
+            .text('Order Details:', { underline: true })
+            .moveDown(0.5);
 
-        
-        doc.fontSize(12).text('Product', 50, 180, { width: 200, align: 'left' })
-            .text('Quantity', 250, 180, { width: 100, align: 'center' })
-            .text('Price', 350, 180, { width: 100, align: 'center' })
-            .text('Total', 450, 180, { width: 100, align: 'center' });
-        doc.moveTo(50, 200).lineTo(550, 200).stroke();
+        doc
+            .font('Helvetica')
+            .text(`Order Number: ${order._id}`)
+            .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`)
+            .text(`Customer: ${order.billingAddress.name}`)
+            .text(
+                `Address: ${order.billingAddress.address}, ${order.billingAddress.city}, ${order.billingAddress.state}, ${order.billingAddress.country} - ${order.billingAddress.pincode}`
+            );
 
-        
-        let yPosition = 210;
+        doc.moveDown(1);
+
+      
+        const tableTop = doc.y;
+        const tableMarginLeft = 50;
+
+        doc
+            .fontSize(12)
+            .font('Helvetica-Bold')
+            .text('Product', tableMarginLeft, tableTop, { width: 200, align: 'left' })
+            .text('Quantity', tableMarginLeft + 220, tableTop, { width: 80, align: 'center' })
+            .text('Price', tableMarginLeft + 320, tableTop, { width: 80, align: 'center' })
+            .text('Total', tableMarginLeft + 420, tableTop, { width: 80, align: 'center' });
+
+        doc.moveTo(tableMarginLeft, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+       
+        let yPosition = tableTop + 25;
         order.items.forEach((item) => {
             const productName = item.product ? item.product.name : 'Product not found';
-            doc.fontSize(10)
-                .text(productName, 50, yPosition, { width: 200, align: 'left' })
-                .text(item.quantity, 250, yPosition, { width: 100, align: 'center' })
-                .text(`Rs ${item.price.toFixed(2)}`, 350, yPosition, { width: 100, align: 'center' })
-                .text(`Rs ${(item.price * item.quantity).toFixed(2)}`, 450, yPosition, { width: 100, align: 'center' });
+            doc
+                .fontSize(10)
+                .font('Helvetica')
+                .text(productName, tableMarginLeft, yPosition, { width: 200, align: 'left' })
+                .text(item.quantity, tableMarginLeft + 220, yPosition, { width: 80, align: 'center' })
+                .text(`Rs ${item.price.toFixed(2)}`, tableMarginLeft + 320, yPosition, { width: 80, align: 'center' })
+                .text(
+                    `Rs ${(item.price * item.quantity).toFixed(2)}`,
+                    tableMarginLeft + 420,
+                    yPosition,
+                    { width: 80, align: 'center' }
+                );
             yPosition += 20;
         });
 
-      
-        doc.moveDown();
-        doc.text(`Subtotal: Rs ${order.totalPrice.toFixed(2)}`, 400, yPosition + 20, { align: 'right' });
-        doc.text(`Discount: Rs ${order.discount ? order.discount.toFixed(2) : '0.00'}`, 400, yPosition + 40, { align: 'right' });
-        doc.text(`Total: Rs ${(order.totalPrice - (order.discount || 0)).toFixed(2)}`, 400, yPosition + 60, { align: 'right' });
+     
+        yPosition += 10;
 
-    
-        doc.moveDown().text('Thanks for purchasing from eyevogue', 50, yPosition + 100, { align: 'center' });
+      
+        const subtotal = order.totalPrice - order.gstAmount - (order.deliveryCharge || 0);
+        doc
+            .moveTo(50, yPosition)
+            .lineTo(550, yPosition)
+            .stroke()
+            .moveDown(0.5);
+
+        yPosition += 15;
+        doc
+            .fontSize(12)
+            .font('Helvetica')
+            .text(`Subtotal:`, 400, yPosition, { align: 'left' })
+            .text(`Rs ${subtotal.toFixed(2)}`, 480, yPosition, { align: 'right' });
+
+        yPosition += 20;
+        doc
+            .text(`GST (18%):`, 400, yPosition, { align: 'left' })
+            .text(`Rs ${order.gstAmount.toFixed(2)}`, 480, yPosition, { align: 'right' });
+
+        if (order.deliveryCharge) {
+            yPosition += 20;
+            doc
+                .text(`Delivery Charges:`, 400, yPosition, { align: 'left' })
+                .text(`Rs ${order.deliveryCharge.toFixed(2)}`, 480, yPosition, { align: 'right' });
+        }
+
+        yPosition += 20;
+        doc
+            .text(`Discount:`, 400, yPosition, { align: 'left' })
+            .text(`Rs ${order.discount ? order.discount.toFixed(2) : '0.00'}`, 480, yPosition, { align: 'right' });
+
+        yPosition += 20;
+        doc
+            .font('Helvetica-Bold')
+            .text(`Total:`, 400, yPosition, { align: 'left' })
+            .text(`Rs ${order.totalPrice.toFixed(2)}`, 480, yPosition, { align: 'right' });
+
+        yPosition += 30;
 
        
+        
         doc.end();
 
         writeStream.on('finish', () => {
@@ -1446,6 +1519,8 @@ const downloadInvoice = async (req, res) => {
         res.status(500).send('Internal server error.');
     }
 };
+
+
 
 
 

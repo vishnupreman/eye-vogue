@@ -1071,9 +1071,11 @@ const downloadPdfSalesReport = async (req, res) => {
         }
 
         const orders = await orderModel.find(filter);
-        const doc = new PDFDocument({ margin: 30 });
 
        
+        const doc = new PDFDocument({ margin: 30, bufferPages: true });
+
+        
         doc.fontSize(18).text('Sales Report', { align: 'center', underline: true });
         doc.moveDown(0.5);
         if (startDate && endDate) {
@@ -1084,7 +1086,7 @@ const downloadPdfSalesReport = async (req, res) => {
         }
         doc.moveDown(1);
 
-        
+       
         doc.fontSize(10).text('Order ID', 50, doc.y, { width: 100, continued: true })
             .text('Date', 150, doc.y, { width: 100, continued: true })
             .text('Discount', 250, doc.y, { width: 80, continued: true, align: 'right' })
@@ -1093,7 +1095,7 @@ const downloadPdfSalesReport = async (req, res) => {
         doc.moveDown(0.5);
         doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
-       
+        
         orders.forEach(order => {
             const orderDate = new Date(order.createdAt);
             const formattedDate = orderDate instanceof Date && !isNaN(orderDate) ? orderDate.toLocaleDateString() : 'Invalid Date';
@@ -1106,16 +1108,17 @@ const downloadPdfSalesReport = async (req, res) => {
             doc.moveDown(0.5);
         });
 
+       
         doc.moveDown(2);
         doc.fontSize(10).text('Thank you for using our services.', { align: 'center', italic: true });
 
-        
         const range = doc.bufferedPageRange(); 
         for (let i = 0; i < range.count; i++) {
             doc.switchToPage(i);
             doc.text(`Page ${i + 1} of ${range.count}`, 0, 750, { align: 'center' });
         }
 
+        // Send PDF
         res.setHeader('Content-Disposition', 'attachment; filename=salesreport.pdf');
         res.setHeader('Content-Type', 'application/pdf');
         doc.pipe(res);
@@ -1125,6 +1128,8 @@ const downloadPdfSalesReport = async (req, res) => {
         res.status(500).send('Error generating PDF report');
     }
 };
+
+
 
 
 const adminSalesData = async(req,res)=>{
@@ -1170,8 +1175,9 @@ const adminSalesData = async(req,res)=>{
 
 const getBestSellingItems = async (req, res) => {
     try {
-        const { type } = req.query;
-console.log(type)
+        const { type, days } = req.query; // Include `days` in the query parameters
+        console.log({ type, days });
+
         let groupByField, lookupCollection, localField, foreignField, projectFields;
 
         if (type === 'products') {
@@ -1211,18 +1217,26 @@ console.log(type)
             return res.status(400).json({ success: false, message: "Invalid type parameter" });
         }
 
-       
+        // Calculate the date filter based on `days`
+        const dateFilter = days
+            ? {
+                createdAt: {
+                    $gte: new Date(new Date().setDate(new Date().getDate() - parseInt(days))),
+                },
+            }
+            : {};
+
+        // Build the aggregation pipeline
         const aggregationPipeline = [
+            { $match: dateFilter }, // Add the date filter to the pipeline
             { $unwind: '$items' },
             {
-                
-                    $lookup: {
-                        from: 'productmodels', 
-                        localField: 'items.product', 
-                        foreignField: '_id', 
-                        as: 'productDetails',
-                    },
-                
+                $lookup: {
+                    from: 'productmodels', 
+                    localField: 'items.product', 
+                    foreignField: '_id', 
+                    as: 'productDetails',
+                },
             },
             { 
                 $unwind: { 
@@ -1238,42 +1252,34 @@ console.log(type)
             },
             { $sort: { totalQuantity: -1 } }, 
             { $limit: 10 },
+            {
+                $lookup: {
+                    from: lookupCollection, 
+                    localField: '_id', 
+                    foreignField: '_id', 
+                    as: `${type}Details`,
+                },
+            },
+            { $unwind: `$${type}Details` },
+            {
+                $project: {
+                    _id: 0,
+                    name: `$${type}Details.name`,
+                    totalQuantity: 1,
+                },
+            },
         ];
 
-    
-
-            aggregationPipeline.push(
-                {
-                    $lookup: {
-                        from: lookupCollection, 
-                        localField: '_id', 
-                        foreignField: '_id', 
-                        as: `${type}Details`,
-                    },
-                },
-                { $unwind: `$${type}Details` } 
-            );
-        
-
-        
-        aggregationPipeline.push({
-            $project: {
-                _id: 0,
-                name:
-                     `$${type}Details.name`,
-                totalQuantity: 1,
-            },
-        });
-
-       
         const bestSellingItems = await orderModel.aggregate(aggregationPipeline);
-console.log(bestSellingItems)
+        console.log(bestSellingItems);
+
         return res.status(200).json({ success: true, data: bestSellingItems });
     } catch (error) {
         console.error("Error in fetching best-selling items:", error);
         return res.status(500).json({ success: false, message: "Failed to fetch best-selling items" });
     }
 };
+
 
 
 module.exports = {
