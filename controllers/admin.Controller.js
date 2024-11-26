@@ -1151,25 +1151,40 @@ const downloadPdfSalesReport = async (req, res) => {
 
 
 
-const adminSalesData = async(req,res)=>{
+const adminSalesData = async (req, res) => {
     const { filter, startDate, endDate } = req.query;
     let start, end;
 
     try {
+        
         if (filter === 'yearly') {
             const year = new Date().getFullYear();
-            start = new Date(`${year}-01-01`);
-            end = new Date(`${year}-12-31`);
+            start = new Date(`${year}-01-01T00:00:00.000Z`);
+            end = new Date(`${year}-12-31T23:59:59.999Z`);
         } else if (filter === 'monthly') {
-            const year = new Date().getFullYear();
-            const month = new Date().getMonth() + 1;
-            start = new Date(`${year}-${month}-01`);
-            end = new Date(`${year}-${month + 1}-01`);
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            start = new Date(year, month, 1); 
+            end = new Date(year, month + 1, 1); 
+            end.setMilliseconds(-1); 
         } else if (filter === 'custom') {
+            if (!startDate || !endDate) {
+                return res.status(400).json({ success: false, message: "Start date and end date are required for custom filter." });
+            }
             start = new Date(startDate);
             end = new Date(endDate);
+
+           
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return res.status(400).json({ success: false, message: "Invalid date range provided." });
+            }
+
+        
+            end.setHours(23, 59, 59, 999);
         }
 
+       
         const salesData = await orderModel.aggregate([
             {
                 $match: {
@@ -1184,17 +1199,19 @@ const adminSalesData = async(req,res)=>{
             },
             { $sort: { _id: 1 } }
         ]);
+
         
         res.status(200).json({ success: true, salesData });
     } catch (error) {
-        console.error(error);
+        console.error("Error fetching sales data:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
+
 
 const getBestSellingItems = async (req, res) => {
     try {
-        const { type, days } = req.query; // Include `days` in the query parameters
+        const { type, days } = req.query; 
         console.log({ type, days });
 
         let groupByField, lookupCollection, localField, foreignField, projectFields;
@@ -1236,7 +1253,7 @@ const getBestSellingItems = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid type parameter" });
         }
 
-        // Calculate the date filter based on `days`
+        
         const dateFilter = days
             ? {
                 createdAt: {
@@ -1245,9 +1262,9 @@ const getBestSellingItems = async (req, res) => {
             }
             : {};
 
-        // Build the aggregation pipeline
+         
         const aggregationPipeline = [
-            { $match: dateFilter }, // Add the date filter to the pipeline
+            { $match: dateFilter }, 
             { $unwind: '$items' },
             {
                 $lookup: {
