@@ -66,7 +66,7 @@
 
 <body>
     <!-- Quick view -->
-    <div class="modal fade custom-modal" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+    <!-- <div class="modal fade custom-modal" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
         <div class="modal-dialog">
         <div class="modal-content">              
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>       
@@ -75,7 +75,7 @@
                         <div class="col-md-6 col-sm-12 col-xs-12">
                             <div class="detail-gallery">
                                 <span class="zoom-icon"><i class="fi-rs-search"></i></span>
-                                <!-- MAIN SLIDES -->
+                               
                                 <div class="product-image-slider">
                                     <figure class="border-radius-10">
                                         <img src="assets/imgs/shop/product-16-2.jpg" alt="product image">
@@ -99,7 +99,7 @@
                                         <img src="assets/imgs/shop/product-16-7.jpg" alt="product image">
                                     </figure>
                                 </div>
-                                <!-- THUMBNAILS -->
+                               
                                 <div class="slider-nav-thumbnails pl-15 pr-15">
                                     <div><img src="assets/imgs/shop/thumbnail-3.jpg" alt="product image"></div>
                                     <div><img src="assets/imgs/shop/thumbnail-4.jpg" alt="product image"></div>
@@ -110,7 +110,7 @@
                                     <div><img src="assets/imgs/shop/thumbnail-9.jpg" alt="product image"></div>
                                 </div>
                             </div>
-                            <!-- End Gallery -->
+                            
                             <div class="social-icons single-share">
                                 <ul class="text-grey-5 d-inline-block">
                                     <li><strong class="mr-10">Share this:</strong></li>
@@ -189,13 +189,13 @@
                                     <li>Availability:<span class="in-stock text-success ml-5">8 Items In Stock</span></li>
                                 </ul>
                             </div>
-                            <!-- Detail Info -->
+                          
                         </div>
                     </div>
                 </div>        
         </div>
         </div>
-    </div>
+    </div> -->
     <header class="header-area header-style-1 header-height-2">
         <div class="header-top header-top-ptb-1 d-none d-lg-block">
             <div class="container">
@@ -315,7 +315,7 @@
                         <a href="index.html"><img src="assets/imgs/theme/logo.svg" alt="logo"></a>
                     </div>
                     <div class="header-nav d-none d-lg-flex">
-                        <div class="main-categori-wrap d-none d-lg-block">
+                        <!-- <div class="main-categori-wrap d-none d-lg-block">
                             <a class="categori-button-active" href="#">
                                 <span class="fi-rs-apps"></span> Browse Categories
                             </a>
@@ -495,7 +495,7 @@
                                 </ul>
                                 <div class="more_categories">Show more...</div>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="main-menu main-menu-padding-1 main-menu-lh-2 d-none d-lg-block">
                             <nav>
                                 <ul>
@@ -819,11 +819,11 @@
                                                     <% } %>
                                                 </a>
                                             </div>
-                                            <div class="product-action-1">
+                                            <!-- <div class="product-action-1">
                                                 <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
                                                 <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
                                                 <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
-                                            </div>
+                                            </div> -->
                                             <% if (element.discountedPrice && element.discountedPrice < element.price) { %>
                                                 <div class="product-badges product-badges-position product-badges-mrg">
                                                     <span class="hot">Save <%= Math.round((1 - (element.discountedPrice / element.price)) * 100) %>%</span>

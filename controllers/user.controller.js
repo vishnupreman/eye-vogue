@@ -25,6 +25,8 @@ const renderHome = async (req, res) => {
         const category = await categoryModel.find();
   
         const products = await productModel.find({ isPublished: true })
+        .sort({ createdAt: -1 })
+        .limit(8)
             .populate({
                 path: 'category', 
                 match: { isListed: true }, 
