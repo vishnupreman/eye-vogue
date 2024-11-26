@@ -368,7 +368,7 @@ button.close:hover {
                                             <% if (itemIndex === 0) { %>
                                                 <td rowspan="<%= order.items.length %>"><%= index + 1 %></td>
                                                 <td rowspan="<%= order.items.length %>"><b><%= order.billingAddress.name %></b></td>
-                                                <td rowspan="<%= order.items.length %>"><%= order.totalPrice %></td>
+                                                <td rowspan="<%= order.items.length %>"><%= order.totalPrice.toFixed(2) %></td>
                                                 <td rowspan="<%= order.items.length %>">
                                                     <span class="badge rounded-pill alert-<%= 
                                                         order.status === 'Pending' ? 'warning' : 

@@ -148,10 +148,10 @@
             <h2>Order Summary</h2>
             <p>
                 
-                GST:<%= orders.gstAmount %><br>
-                Discount:<%= orders.discount %><br>
-                Delivery Charge:<%= orders.deliveryCharge %><br>
-                OrderTotal:<%= orders.totalPrice %><br>
+                GST:<%= orders.gstAmount.toFixed(2) %><br>
+                Discount:<%= orders.discount.toFixed(2) %><br>
+                Delivery Charge:<%= orders.deliveryCharge.toFixed(2) %><br>
+                OrderTotal:<%= orders.totalPrice.toFixed(2) %><br>
                 
             </p>
         </div>
@@ -226,7 +226,7 @@
     
 
     <div class="order-total">
-        <p>Total:Rs.<%= orders.totalPrice %></p>
+        <p>Total:Rs.<%= orders.totalPrice.toFixed(2) %></p>
     </div>
 
     <div id="returnModal" class="modal" style="display: none;">

@@ -1048,13 +1048,26 @@ const downloadPdfSalesReport = async (req, res) => {
         const { startDate, endDate, timeFilter } = req.query;
         let filter = {};
 
+       
         if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+         
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return res.status(400).json({ message: 'Invalid date range provided.' });
+            }
+
+            
+            end.setHours(23, 59, 59, 999);
+
             filter.createdAt = {
-                $gte: new Date(startDate),
-                $lte: new Date(endDate)
+                $gte: start,
+                $lte: end
             };
         }
 
+       
         if (timeFilter) {
             const now = moment();
             switch (timeFilter) {
@@ -1067,15 +1080,18 @@ const downloadPdfSalesReport = async (req, res) => {
                 case 'month':
                     filter.createdAt = { $gte: now.startOf('month').toDate() };
                     break;
+                default:
+                    return res.status(400).json({ message: 'Invalid time filter provided.' });
             }
         }
 
+       
         const orders = await orderModel.find(filter);
 
-       
+      
         const doc = new PDFDocument({ margin: 30, bufferPages: true });
 
-        
+ 
         doc.fontSize(18).text('Sales Report', { align: 'center', underline: true });
         doc.moveDown(0.5);
         if (startDate && endDate) {
@@ -1086,7 +1102,7 @@ const downloadPdfSalesReport = async (req, res) => {
         }
         doc.moveDown(1);
 
-       
+     
         doc.fontSize(10).text('Order ID', 50, doc.y, { width: 100, continued: true })
             .text('Date', 150, doc.y, { width: 100, continued: true })
             .text('Discount', 250, doc.y, { width: 80, continued: true, align: 'right' })
@@ -1095,10 +1111,12 @@ const downloadPdfSalesReport = async (req, res) => {
         doc.moveDown(0.5);
         doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
-        
+      
         orders.forEach(order => {
             const orderDate = new Date(order.createdAt);
-            const formattedDate = orderDate instanceof Date && !isNaN(orderDate) ? orderDate.toLocaleDateString() : 'Invalid Date';
+            const formattedDate = orderDate instanceof Date && !isNaN(orderDate)
+                ? orderDate.toLocaleDateString()
+                : 'Invalid Date';
 
             doc.text(order._id, 50, doc.y, { width: 100, continued: true })
                 .text(formattedDate, 150, doc.y, { width: 100, continued: true })
@@ -1108,17 +1126,17 @@ const downloadPdfSalesReport = async (req, res) => {
             doc.moveDown(0.5);
         });
 
-       
+     
         doc.moveDown(2);
         doc.fontSize(10).text('Thank you for using our services.', { align: 'center', italic: true });
 
-        const range = doc.bufferedPageRange(); 
+        const range = doc.bufferedPageRange();
         for (let i = 0; i < range.count; i++) {
             doc.switchToPage(i);
             doc.text(`Page ${i + 1} of ${range.count}`, 0, 750, { align: 'center' });
         }
 
-        // Send PDF
+      
         res.setHeader('Content-Disposition', 'attachment; filename=salesreport.pdf');
         res.setHeader('Content-Type', 'application/pdf');
         doc.pipe(res);
@@ -1128,6 +1146,7 @@ const downloadPdfSalesReport = async (req, res) => {
         res.status(500).send('Error generating PDF report');
     }
 };
+
 
 
 
